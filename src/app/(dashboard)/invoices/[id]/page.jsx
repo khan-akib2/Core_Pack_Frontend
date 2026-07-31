@@ -77,22 +77,22 @@ export default function InvoiceDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between print:hidden">
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
+        <div className="flex items-center space-x-3 w-full sm:w-auto">
           <Link href="/invoices">
-            <Button variant="outline" size="sm"><ArrowLeft className="w-4 h-4" /></Button>
+            <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
-          <h1 className="text-2xl font-bold text-slate-100">Tax Invoice {invoice.invoiceNumber}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">Tax Invoice {invoice.invoiceNumber}</h1>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button onClick={handlePrint}>
+        <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <Button onClick={handlePrint} className="w-full sm:w-auto whitespace-nowrap">
             <Printer className="w-4 h-4 mr-2" /> Print A4 Invoice
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
-        <Card className="p-5 border-slate-800 lg:col-span-1 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden items-start">
+        <Card className="p-5 border-slate-800 lg:col-span-1 space-y-4 sticky top-6">
           <h3 className="font-semibold text-amber-400 flex items-center gap-2">
             <CreditCard className="w-4 h-4" /> Record Payment Received
           </h3>
@@ -125,8 +125,19 @@ export default function InvoiceDetailPage() {
           </form>
         </Card>
 
-        <div className="lg:col-span-2">
-          <InvoicePrintable invoice={invoice} company={company} />
+        <style>{`
+          .responsive-bill { zoom: 0.42; }
+          @media (min-width: 480px) { .responsive-bill { zoom: 0.55; } }
+          @media (min-width: 640px) { .responsive-bill { zoom: 0.75; } }
+          @media (min-width: 768px) { .responsive-bill { zoom: 0.9; } }
+          @media (min-width: 1024px) { .responsive-bill { zoom: 0.65; } }
+          @media (min-width: 1280px) { .responsive-bill { zoom: 0.75; } }
+          @media (min-width: 1536px) { .responsive-bill { zoom: 0.9; } }
+        `}</style>
+        <div className="lg:col-span-2 overflow-auto flex justify-start xl:justify-center items-start print:hidden custom-scrollbar w-full p-2">
+          <div className="responsive-bill origin-top shadow-2xl transition-all duration-300">
+            <InvoicePrintable invoice={invoice} company={company} />
+          </div>
         </div>
       </div>
 

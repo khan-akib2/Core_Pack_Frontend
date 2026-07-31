@@ -37,21 +37,35 @@ export default function QuotationDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between print:hidden">
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
+        <div className="flex items-center space-x-3 w-full sm:w-auto">
           <Link href="/quotations">
-            <Button variant="outline" size="sm"><ArrowLeft className="w-4 h-4" /></Button>
+            <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
-          <h1 className="text-2xl font-bold text-slate-100">Official Quotation {quotation.quoteNumber}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">Official Quotation {quotation.quoteNumber}</h1>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button onClick={handlePrint}>
-            <Printer className="w-4 h-4 mr-2" /> Print Quotation
+        <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <Button onClick={handlePrint} className="w-full sm:w-auto whitespace-nowrap">
+            <Printer className="w-4 h-4 mr-2" /> Print A4
           </Button>
         </div>
       </div>
 
-      <div className="py-4">
+      <style>{`
+        .responsive-bill { zoom: 0.42; }
+        @media (min-width: 480px) { .responsive-bill { zoom: 0.55; } }
+        @media (min-width: 640px) { .responsive-bill { zoom: 0.75; } }
+        @media (min-width: 768px) { .responsive-bill { zoom: 0.9; } }
+        @media (min-width: 1024px) { .responsive-bill { zoom: 0.65; } }
+        @media (min-width: 1280px) { .responsive-bill { zoom: 0.75; } }
+        @media (min-width: 1536px) { .responsive-bill { zoom: 0.9; } }
+      `}</style>
+      <div className="py-4 overflow-auto flex justify-start xl:justify-center items-start print:hidden custom-scrollbar w-full p-2">
+        <div className="responsive-bill origin-top shadow-2xl transition-all duration-300">
+          <QuotationPrintable quotation={quotation} company={company} />
+        </div>
+      </div>
+      <div className="hidden print:block">
         <QuotationPrintable quotation={quotation} company={company} />
       </div>
     </div>

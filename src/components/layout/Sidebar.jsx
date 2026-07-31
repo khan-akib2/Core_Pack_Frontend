@@ -45,6 +45,16 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
     refetchInterval: 15000
   });
 
+  const { data: companyRes } = useQuery({
+    queryKey: ['companySettings'],
+    queryFn: async () => {
+      const res = await api.get('/company');
+      return res.data;
+    }
+  });
+
+  const company = companyRes?.data || {};
+
   const rawNotifications = notificationRes?.data || [];
   const notifications = rawNotifications.filter(n => new Date(n.createdAt).getTime() > clearedAt);
   const unreadCount = notifications.filter(n => new Date(n.createdAt).getTime() > readUntil).length;
@@ -54,15 +64,19 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
       <div>
         {/* Logo Container */}
         <div className="flex items-center justify-between mr-3.5 mb-6">
-          <div className="flex items-center space-x-3 px-3 py-2.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md flex-1">
-            <img src="/logo.png" alt="Core Pack Logo" className="h-8 w-auto bg-white rounded-md p-1 shadow-2xs object-contain" />
-            <div>
-              <h1 className="font-bold text-white text-[14px] leading-none tracking-tight">CORE PACK</h1>
-              <p className="text-[9.5px] text-orange-400 font-semibold tracking-widest mt-1">INDIA v1.0</p>
+          <div className="flex items-center space-x-3 px-2 py-1 flex-1 min-w-0">
+            <div className="bg-white p-1.5 rounded-xl shadow-lg shadow-black/20 shrink-0">
+               <img src="/logo.png" alt="Logo" className="h-6 w-auto object-contain" />
+            </div>
+            <div className="flex-1 min-w-0 pr-2">
+              <h1 className="font-bold text-white text-[15px] leading-none tracking-tight truncate">
+                {company?.companyName || 'CORE PACK'}
+              </h1>
+              <p className="text-[10px] text-slate-400 font-medium mt-1 truncate">Business Portal</p>
             </div>
           </div>
           {onCloseMobile && (
-            <button onClick={onCloseMobile} className="lg:hidden p-1.5 ml-2 text-slate-400 hover:text-white rounded-lg">
+            <button onClick={onCloseMobile} className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg shrink-0">
               <X className="w-5 h-5" />
             </button>
           )}
@@ -121,12 +135,18 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
       </div>
 
       {/* Footer Profile Card */}
-      <div className="bg-[#070C18] p-3 rounded-xl border border-slate-800/80 text-xs mr-3.5">
-        <p className="text-xs font-semibold text-slate-200 leading-tight">Core Pack India</p>
-        <p className="text-[10.5px] text-slate-400 font-mono mt-0.5">GST: 27AMSPK9622Q1ZZ</p>
-        <div className="mt-2 flex items-center space-x-1.5 text-[9.5px] text-orange-400 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Real-time Live Sync</span>
+      <div className="bg-[#070C18] p-3.5 rounded-xl border border-slate-800/80 text-xs mr-3.5 relative overflow-hidden group shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center shrink-0 border border-slate-600 shadow-inner">
+            <span className="text-xs font-bold text-slate-200">
+              {(company?.companyName || 'CP').substring(0, 2).toUpperCase()}
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-bold text-slate-200 leading-tight truncate">{company?.companyName || 'Core Pack India'}</p>
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">{company?.gstin ? `GST: ${company.gstin}` : 'Setup GSTIN in Settings'}</p>
+          </div>
         </div>
       </div>
     </aside>

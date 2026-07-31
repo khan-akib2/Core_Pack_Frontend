@@ -51,17 +51,17 @@ export default function DashboardLayout({ children }) {
 
   return (
     <SmoothScrollProvider>
-      <div className="min-h-screen bg-[#0B132A] flex font-sans antialiased text-slate-800 selection:bg-orange-500 selection:text-white">
+      <div className="min-h-screen bg-[#0B132A] flex print:block font-sans antialiased text-slate-800 selection:bg-orange-500 selection:text-white">
         <Sidebar
           isMobileOpen={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
-        <div className="flex-1 bg-[#F4F6FB] shadow-2xl flex flex-col min-w-0 h-screen overflow-hidden">
+        <div className="flex-1 bg-[#F4F6FB] shadow-2xl flex flex-col min-w-0 h-screen overflow-hidden print:h-auto print:overflow-visible">
           <Header
             onOpenSearch={() => setIsSearchOpen(true)}
             onMenuToggle={() => setIsMobileMenuOpen(true)}
           />
-          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-[#F4F6FB]">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto print:overflow-visible bg-[#F4F6FB]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}

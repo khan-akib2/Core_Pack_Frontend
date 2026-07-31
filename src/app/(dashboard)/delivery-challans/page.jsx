@@ -52,13 +52,13 @@ export default function DeliveryChallansPage() {
 
   return (
     <div className="space-y-6 antialiased">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Delivery Challans</h1>
           <p className="text-xs text-slate-500 mt-0.5">Track factory dispatches, goods movement, and vehicle logs</p>
         </div>
-        <Link href="/delivery-challans/new">
-          <Button className="flex items-center gap-2">
+        <Link href="/delivery-challans/new" className="w-full sm:w-auto">
+          <Button className="flex items-center justify-center gap-2 w-full whitespace-nowrap">
             <Plus className="w-4 h-4" /> Issue Delivery Challan
           </Button>
         </Link>
@@ -78,7 +78,7 @@ export default function DeliveryChallansPage() {
 
       <Card className="p-0 overflow-hidden border-slate-200/80">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 <th className="p-3.5 pl-4">Challan #</th>

@@ -120,7 +120,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs whitespace-nowrap">
             <thead>
               <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
                 <th className="pb-3">Challan #</th>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs whitespace-nowrap">
             <thead>
               <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
                 <th className="pb-3">Invoice #</th>

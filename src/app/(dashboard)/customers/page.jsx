@@ -103,12 +103,12 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6 antialiased">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Customer Directory</h1>
           <p className="text-xs text-slate-500 mt-0.5">Manage client profiles, GSTIN validation, and billing addresses</p>
         </div>
-        <Button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2">
+        <Button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap">
           <Plus className="w-4 h-4" /> Add Customer
         </Button>
       </div>
@@ -127,7 +127,7 @@ export default function CustomersPage() {
 
       <Card className="p-0 overflow-hidden border-slate-200/80">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 <th className="p-3.5 pl-4">Company Name</th>

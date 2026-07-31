@@ -102,14 +102,14 @@ export default function SettingsPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto pb-12 antialiased">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Company & Print Settings</h1>
           <p className="text-xs text-slate-500 mt-0.5">Configure Core Pack India identity, GST credentials, Bank A/C & customizable print messages</p>
         </div>
-        <Button type="submit" disabled={updateSettingsMutation.isPending}>
-          <Save className="w-4 h-4 mr-2" />
-          {updateSettingsMutation.isPending ? 'Saving...' : 'Save Configuration'}
+        <Button type="submit" disabled={updateSettingsMutation.isPending} className="flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap">
+          <Save className="w-4 h-4 shrink-0" />
+          <span className="truncate">{updateSettingsMutation.isPending ? 'Saving...' : 'Save Configuration'}</span>
         </Button>
       </div>
 

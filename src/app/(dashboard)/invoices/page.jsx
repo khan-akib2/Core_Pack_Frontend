@@ -78,7 +78,7 @@ export default function InvoicesPage() {
 
       <Card className="p-0 overflow-hidden border-slate-200/80">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 <th className="p-3.5 pl-4">Invoice #</th>

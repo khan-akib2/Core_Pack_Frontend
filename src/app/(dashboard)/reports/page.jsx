@@ -66,17 +66,17 @@ export default function ReportsPage() {
   return (
     <>
       <div className="space-y-6 antialiased print:hidden">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">GST & Sales Reports</h1>
             <p className="text-xs text-slate-500 mt-0.5">GSTR-1 return filing, tax liabilities, and sales performance analytics</p>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex items-center gap-1.5">
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Export Excel (CSV)
+          <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 whitespace-nowrap">
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Export Excel
             </Button>
-            <Button variant="primary" size="sm" onClick={handleExportPDF} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white">
-              <Printer className="w-4 h-4" /> Export PDF Report
+            <Button variant="primary" size="sm" onClick={handleExportPDF} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white whitespace-nowrap">
+              <Printer className="w-4 h-4" /> Export PDF
             </Button>
           </div>
         </div>
@@ -97,18 +97,18 @@ export default function ReportsPage() {
         </div>
 
         <Card className="p-6 border-slate-200/80 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <FileText className="w-4.5 h-4.5 text-orange-600" /> GSTR-1 Return Filing Data
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">Summary of B2B and B2C invoices for current GST period</p>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={handleExportCSV} className="flex-1 sm:flex-none flex items-center justify-center whitespace-nowrap">
                 <Download className="w-4 h-4 mr-1.5" /> CSV / Excel
               </Button>
-              <Button size="sm" onClick={handleExportPDF} className="bg-orange-500 hover:bg-orange-600 text-white">
+              <Button size="sm" onClick={handleExportPDF} className="flex-1 sm:flex-none flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white whitespace-nowrap">
                 <Printer className="w-4 h-4 mr-1.5" /> Export PDF
               </Button>
             </div>
