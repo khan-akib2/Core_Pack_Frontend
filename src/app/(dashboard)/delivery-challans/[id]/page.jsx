@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { ChallanPrintable } from '@/components/printable/ChallanPrintable';
-import { Printer, ArrowLeft } from 'lucide-react';
+import { Printer, ArrowLeft, Pencil } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ChallanDetailPage() {
@@ -36,7 +36,7 @@ export default function ChallanDetailPage() {
   if (!challan) return <p className="text-rose-400 p-8 text-center">Delivery Challan not found.</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print:space-y-0 print:m-0">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
           <Link href="/delivery-challans">
@@ -45,8 +45,13 @@ export default function ChallanDetailPage() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">Delivery Challan {challan.challanNumber}</h1>
         </div>
         <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <Link href={`/delivery-challans/edit/${id}`}>
+            <Button variant="outline" className="w-full sm:w-auto whitespace-nowrap">
+              <Pencil className="w-4 h-4 mr-2" /> Edit Challan
+            </Button>
+          </Link>
           <Button onClick={handlePrint} className="w-full sm:w-auto whitespace-nowrap">
-            <Printer className="w-4 h-4 mr-2" /> Print A4
+            <Printer className="w-4 h-4 mr-2" /> Print Challan
           </Button>
         </div>
       </div>

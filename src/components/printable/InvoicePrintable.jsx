@@ -61,22 +61,24 @@ export function InvoicePrintable({ invoice, company }) {
   };
 
   const items = invoice.items || [];
-  const minRows = 8;
+  const minRows = 10;
   const dummy = Math.max(0, minRows - items.length);
 
   const subtotal = Number(invoice.subtotal || 0);
   const transport = Number(invoice.transportationCharges || 0);
   const beforeTax = subtotal + transport;
-  const tax0 = items[0]?.taxRate || 5;
+  const tax0 = items[0]?.taxRate || 18;
   const cgstR = invoice.isInterstate ? 0 : tax0 / 2;
   const sgstR = invoice.isInterstate ? 0 : tax0 / 2;
   const igstR = invoice.isInterstate ? tax0 : 0;
-  const cgstV = invoice.cgstTotal !== undefined ? Number(invoice.cgstTotal) : (invoice.isInterstate ? 0 : beforeTax * (cgstR / 100));
-  const sgstV = invoice.sgstTotal !== undefined ? Number(invoice.sgstTotal) : (invoice.isInterstate ? 0 : beforeTax * (sgstR / 100));
-  const igstV = invoice.igstTotal !== undefined ? Number(invoice.igstTotal) : (invoice.isInterstate ? beforeTax * (igstR / 100) : 0);
+  const cgstV = invoice.isInterstate ? 0 : beforeTax * (cgstR / 100);
+  const sgstV = invoice.isInterstate ? 0 : beforeTax * (sgstR / 100);
+  const igstV = invoice.isInterstate ? beforeTax * (igstR / 100) : 0;
   const gst = cgstV + sgstV + igstV;
-  const grand = Number(invoice.grandTotal || (beforeTax + gst));
-  const words = invoice.amountInWords || numberToWords(grand);
+  const calculatedGrand = beforeTax + gst;
+  const roundOff = invoice.roundOff !== undefined ? Number(invoice.roundOff) : (Math.round(calculatedGrand) - calculatedGrand);
+  const grand = Math.round(calculatedGrand + roundOff);
+  const words = numberToWords(grand);
 
   const custName = invoice.customerSnapshot?.companyName || invoice.customerSnapshot?.name || '';
   const addr1 = invoice.customerSnapshot?.billingAddress?.street || invoice.customerSnapshot?.address || '';
@@ -120,7 +122,6 @@ export function InvoicePrintable({ invoice, company }) {
   return (
     <div className="printable-document select-none" style={{
       width: '794px',
-      minHeight: '1050px',
       backgroundColor: 'white',
       fontFamily: "'Inter', sans-serif",
       color: '#000',
@@ -128,7 +129,7 @@ export function InvoicePrintable({ invoice, company }) {
       position: 'relative',
     }}>
       {/* Final outer line of the whole bill */}
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, border: B2, pointerEvents: 'none', zIndex: 100 }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, border: B2, pointerEvents: 'none', zIndex: 10 }} />
       <style>{`
         @media print {
           @page { margin: 0; size: A4 portrait; }
@@ -139,9 +140,6 @@ export function InvoicePrintable({ invoice, company }) {
             print-color-adjust: exact; 
           }
           .printable-document {
-            zoom: 0.84;
-            transform: scale(0.84);
-            transform-origin: top center;
             margin: 0 auto !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
@@ -349,16 +347,16 @@ export function InvoicePrintable({ invoice, company }) {
         </div>
 
         {/* ════ PRODUCT TABLE ════ */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
           <colgroup>
             <col style={{ width: '40px' }} />
             <col />
             <col style={{ width: '78px' }} />
             <col style={{ width: '46px' }} />
-            <col style={{ width: '57px' }} />
-            <col style={{ width: '37px' }} />
-            <col style={{ width: '63px' }} />
-            <col style={{ width: '40px' }} />
+            <col style={{ width: '80px' }} />
+            <col style={{ width: '30px' }} />
+            <col style={{ width: '85px' }} />
+            <col style={{ width: '30px' }} />
           </colgroup>
           <thead>
             <tr style={{ background: N, color: 'white', fontSize: '10px', fontWeight: '700', textAlign: 'center' }}>
@@ -390,9 +388,12 @@ export function InvoicePrintable({ invoice, company }) {
                 <tr key={idx} style={{ borderBottom: B1, textAlign: 'center', verticalAlign: 'top', height: '25px' }}>
                   <td style={{ padding: '4px 3px', borderRight: B1, fontSize: '10px' }}>{idx + 1}</td>
                   <td style={{ padding: '4px 7px', borderRight: B1, textAlign: 'left', fontWeight: '600', fontSize: '10.5px' }}>
-                    <div>{item.name}</div>
+                    <div>
+                      {item.name}
+                      {item.boxSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.boxSize}</span>}
+                      {item.palletSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.palletSize}</span>}
+                    </div>
                     {item.description && <div style={{ fontSize: '9px', color: '#666', fontWeight: '400' }}>{item.description}</div>}
-                    {(item.boxSize || item.palletSize) && <div style={{ fontSize: '9px', color: '#666', fontWeight: '500', marginTop: '1px' }}>{item.boxSize && <span style={{ marginRight: '8px' }}>Box: {item.boxSize}</span>}{item.palletSize && <span>Pallet: {item.palletSize}</span>}</div>}
                   </td>
                   <td style={{ padding: '4px 3px', borderRight: B1, fontFamily: 'monospace', fontSize: '10px' }}>{item.hsnCode || '44151000'}</td>
                   <td style={{ padding: '4px 3px', borderRight: B1, fontWeight: '700', fontSize: '10.5px' }}>{item.qty}</td>
@@ -439,6 +440,7 @@ export function InvoicePrintable({ invoice, company }) {
               <div style={{ display: 'inline-block', background: N, color: 'white', fontSize: '9.5px', fontWeight: '700', padding: '3px 10px', borderRadius: '3px', marginBottom: '6px' }}>Bank Details :</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {[
+                  { lbl: 'Bank Name', val: company?.bankDetails?.bankName || '' },
                   { lbl: 'Bank A/c No.', val: company?.bankDetails?.accountNo || company?.bankDetails?.accountNumber || '', mono: true },
                   { lbl: 'Bank Branch', val: company?.bankDetails?.branch || '' },
                   { lbl: 'Bank IFSC', val: company?.bankDetails?.ifsc || company?.bankDetails?.ifscCode || '', mono: true },
@@ -494,7 +496,7 @@ export function InvoicePrintable({ invoice, company }) {
             </div>
 
             {/* Signature Section */}
-            <div style={{ display: 'flex', flex: 1, minHeight: '100px' }}>
+            <div style={{ display: 'flex', flex: 1, minHeight: '130px' }}>
               <div style={{ flex: 1, position: 'relative', padding: '4px 10px 0' }}>
                 <div style={{ fontSize: '8.5px', color: '#333', fontWeight: '500', lineHeight: '1.2', textAlign: 'center', marginBottom: '2px' }}>
                   Certified that the particulars given are true and correct.

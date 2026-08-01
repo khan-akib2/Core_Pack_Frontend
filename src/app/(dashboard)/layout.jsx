@@ -57,11 +57,13 @@ export default function DashboardLayout({ children }) {
           onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
         <div className="flex-1 bg-[#F4F6FB] shadow-2xl flex flex-col min-w-0 h-screen overflow-hidden print:h-auto print:overflow-visible">
-          <Header
-            onOpenSearch={() => setIsSearchOpen(true)}
-            onMenuToggle={() => setIsMobileMenuOpen(true)}
-          />
-          <main className="p-4 sm:p-8 flex-1 overflow-y-auto print:overflow-visible bg-[#F4F6FB]">
+          <div className="print:hidden">
+            <Header
+              onOpenSearch={() => setIsSearchOpen(true)}
+              onMenuToggle={() => setIsMobileMenuOpen(true)}
+            />
+          </div>
+          <main className="p-4 sm:p-8 print:p-0 flex-1 overflow-y-auto print:overflow-visible bg-[#F4F6FB] print:bg-white">
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}

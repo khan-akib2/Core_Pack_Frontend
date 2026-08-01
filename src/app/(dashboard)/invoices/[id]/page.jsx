@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { InvoicePrintable } from '@/components/printable/InvoicePrintable';
-import { Printer, ArrowLeft, CreditCard } from 'lucide-react';
+import { Printer, ArrowLeft, CreditCard, Pencil } from 'lucide-react';
 import Link from 'next/link';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
@@ -76,7 +76,7 @@ export default function InvoiceDetailPage() {
   if (!invoice) return <p className="text-rose-400 p-8 text-center">Invoice not found.</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print:space-y-0 print:m-0">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
           <Link href="/invoices">
@@ -85,6 +85,11 @@ export default function InvoiceDetailPage() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">Tax Invoice {invoice.invoiceNumber}</h1>
         </div>
         <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <Link href={`/invoices/edit/${id}`}>
+            <Button variant="outline" className="w-full sm:w-auto whitespace-nowrap">
+              <Pencil className="w-4 h-4 mr-2" /> Edit Invoice
+            </Button>
+          </Link>
           <Button onClick={handlePrint} className="w-full sm:w-auto whitespace-nowrap">
             <Printer className="w-4 h-4 mr-2" /> Print A4 Invoice
           </Button>

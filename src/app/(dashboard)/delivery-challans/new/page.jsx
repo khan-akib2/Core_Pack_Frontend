@@ -20,6 +20,7 @@ export default function NewDeliveryChallanPage() {
 
   const [customerId, setCustomerId] = useState('');
   const [challanDate, setChallanDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customChallanNumber, setCustomChallanNumber] = useState('');
   const [vehicleNo, setVehicleNo] = useState('');
   const [poNumber, setPoNumber] = useState('');
   const [notes, setNotes] = useState('');
@@ -37,6 +38,12 @@ export default function NewDeliveryChallanPage() {
   });
 
   const nextChallanNo = counterData?.nextNumber || '001';
+
+  React.useEffect(() => {
+    if (nextChallanNo && !customChallanNumber && counterData) {
+      setCustomChallanNumber(nextChallanNo);
+    }
+  }, [nextChallanNo, counterData]);
 
   const { data: customers } = useQuery({
     queryKey: ['customersList'],
@@ -133,6 +140,7 @@ export default function NewDeliveryChallanPage() {
 
     createChallanMutation.mutate({
       customerId,
+      challanNumber: customChallanNumber || nextChallanNo,
       challanDate,
       vehicleNo,
       notes,
@@ -142,17 +150,17 @@ export default function NewDeliveryChallanPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-12 antialiased">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3 w-full sm:w-auto">
           <Link href="/delivery-challans">
-            <Button variant="outline" size="sm"><ArrowLeft className="w-4 h-4" /></Button>
+            <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Issue Delivery Challan</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Auto-generated Challan No: <span className="font-mono font-bold text-orange-600">{nextChallanNo}</span></p>
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Issue Delivery Challan</h1>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">Review items, customize fields, and issue delivery challan</p>
           </div>
         </div>
-        <Button type="submit" disabled={createChallanMutation.isPending}>
+        <Button type="submit" className="w-full sm:w-auto" disabled={createChallanMutation.isPending}>
           {createChallanMutation.isPending ? 'Generating...' : 'Save & Issue Challan'}
         </Button>
       </div>
@@ -161,7 +169,7 @@ export default function NewDeliveryChallanPage() {
         <h2 className="text-sm font-bold text-orange-600 border-b border-slate-100 pb-2">Dispatch & Vehicle Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Select
-            label="Select Consignee / Customer *"
+            label="Select Consignee / Customer*"
             required
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
@@ -171,6 +179,14 @@ export default function NewDeliveryChallanPage() {
               <option key={c._id} value={c._id}>{c.companyName || c.name}</option>
             ))}
           </Select>
+
+          <Input
+            label="Challan No. (Customizable) *"
+            value={customChallanNumber}
+            onChange={(e) => setCustomChallanNumber(e.target.value)}
+            placeholder="e.g. 001"
+            required
+          />
 
           <Input label="Challan Date *" type="date" value={challanDate} onChange={(e) => setChallanDate(e.target.value)} required />
           <Input label="Vehicle Number" value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} placeholder="e.g. MH 04 AB 1234" />
@@ -187,8 +203,8 @@ export default function NewDeliveryChallanPage() {
 
         <div className="space-y-3">
           {items.map((item, idx) => (
-            <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-slate-50/80 p-3 rounded-xl border border-slate-200">
-              <div className="col-span-4">
+            <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-2 items-center bg-slate-50/80 p-3 rounded-xl border border-slate-200">
+              <div className="sm:col-span-4">
                 <Select
                   label="Product"
                   value={item.productId}
@@ -201,7 +217,7 @@ export default function NewDeliveryChallanPage() {
                 </Select>
               </div>
 
-              <div className="col-span-3">
+              <div className="sm:col-span-4">
                 <input
                   type="text"
                   placeholder="Item Particular / Dimensions"
@@ -211,9 +227,9 @@ export default function NewDeliveryChallanPage() {
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="sm:col-span-3">
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Qty"
                   value={item.qty}
                   onChange={(e) => updateItemField(idx, 'qty', e.target.value)}
@@ -221,17 +237,7 @@ export default function NewDeliveryChallanPage() {
                 />
               </div>
 
-              <div className="col-span-2">
-                <input
-                  type="text"
-                  placeholder="Remarks"
-                  value={item.remarks}
-                  onChange={(e) => updateItemField(idx, 'remarks', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-medium"
-                />
-              </div>
-
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="sm:col-span-1 flex items-center justify-end">
                 <button type="button" onClick={() => removeItemRow(idx)} className="text-slate-400 hover:text-rose-500 p-1">
                   <Trash2 className="w-4 h-4" />
                 </button>

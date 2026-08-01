@@ -15,6 +15,7 @@ import {
   Settings,
   FileCode,
   Bell,
+  Database,
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Product Catalog', href: '/products', icon: Package },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Reports & Tax', href: '/reports', icon: BarChart3 },
+  { name: 'Database Backups', href: '/backups', icon: Database },
   { name: 'Company Settings', href: '/settings', icon: Settings }
 ];
 
@@ -49,11 +51,11 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
     queryKey: ['companySettings'],
     queryFn: async () => {
       const res = await api.get('/company');
-      return res.data;
+      return res.data.data;
     }
   });
 
-  const company = companyRes?.data || {};
+  const company = companyRes || {};
 
   const rawNotifications = notificationRes?.data || [];
   const notifications = rawNotifications.filter(n => new Date(n.createdAt).getTime() > clearedAt);
@@ -155,7 +157,7 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
   return (
     <>
       {/* Desktop Fixed Sidebar */}
-      <div className="hidden lg:block h-screen sticky top-0 z-30">
+      <div className="hidden lg:block h-screen sticky top-0 z-30 print:hidden">
         {sidebarContent}
       </div>
 

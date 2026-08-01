@@ -35,7 +35,7 @@ export function ChallanPrintable({ challan, company }) {
   if (!challan) return null;
 
   const items = challan.items || [];
-  const minRows = 16;
+  const minRows = 12;
   const dummy = Math.max(0, minRows - items.length);
 
   const custName = challan.customerSnapshot?.companyName || challan.customerSnapshot?.name || '';
@@ -58,7 +58,9 @@ export function ChallanPrintable({ challan, company }) {
   return (
     <div className="printable-document select-none" style={{
       width: '794px',
-      minHeight: '1050px',
+      minHeight: '1122px',
+      display: 'flex',
+      flexDirection: 'column',
       backgroundColor: 'white',
       fontFamily: "'Inter', sans-serif",
       color: '#000',
@@ -66,7 +68,7 @@ export function ChallanPrintable({ challan, company }) {
       position: 'relative',
     }}>
       {/* Final outer line of the whole bill */}
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, border: B2, pointerEvents: 'none', zIndex: 100 }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, border: B2, pointerEvents: 'none', zIndex: 10 }} />
       <style>{`
         @media print {
           @page { margin: 0; size: A4 portrait; }
@@ -77,9 +79,6 @@ export function ChallanPrintable({ challan, company }) {
             print-color-adjust: exact; 
           }
           .printable-document {
-            zoom: 0.84;
-            transform: scale(0.84);
-            transform-origin: top center;
             margin: 0 auto !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
@@ -169,7 +168,7 @@ export function ChallanPrintable({ challan, company }) {
       </div>
 
       {/* ════════ MAIN BOX ════════ */}
-      <div style={{ border: B2, margin: '12px 8px 8px 8px', background: 'white', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', minHeight: '910px' }}>
+      <div style={{ flex: 1, border: B2, margin: '12px 8px 8px 8px', background: 'white', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column' }}>
 
         {/* ── TOP ROW: Title ── */}
         <div style={{ display: 'flex', borderBottom: B2, alignItems: 'center', justifyContent: 'center', minHeight: '32px' }}>
@@ -195,7 +194,7 @@ export function ChallanPrintable({ challan, company }) {
           </div>
 
           {/* RIGHT: metadata */}
-          <div style={{ flex: '0 0 240px', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
+          <div style={{ flex: '0 0 240px', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'center' }}>
             {/* Challan No */}
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
               <span style={{ fontWeight: '800', color: O, fontSize: '12px', width: '80px', flexShrink: 0 }}>Challan No.</span>
@@ -203,19 +202,24 @@ export function ChallanPrintable({ challan, company }) {
             </div>
             {/* Date */}
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <span style={{ fontWeight: '800', color: O, fontSize: '12px', width: '80px', flexShrink: 0 }}>Date</span>
+              <span style={{ fontWeight: '800', color: O, fontSize: '12px', width: '80px', flexShrink: 0 }}>Challan Date</span>
               <div style={{ flex: 1, borderBottom: '1px dotted #111', fontSize: '13px', textAlign: 'center', fontWeight: '600' }}>{formatDate(challan.challanDate)}</div>
+            </div>
+            {/* Vehicle No */}
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <span style={{ fontWeight: '800', color: O, fontSize: '12px', width: '80px', flexShrink: 0 }}>Vehicle No.</span>
+              <div style={{ flex: 1, borderBottom: '1px dotted #111', fontSize: '12px', textAlign: 'center', fontFamily: 'monospace', fontWeight: '600' }}>{challan.vehicleNo || ''}</div>
             </div>
           </div>
         </div>
 
         {/* Sub-banner */}
         <div style={{ textAlign: 'center', padding: '6px 0', borderBottom: B2, color: O, fontSize: '11px', fontWeight: '600' }}>
-          Please receive the following goods in good order & condition.
+          {company?.challanBannerText || 'Please receive the following goods in good order & condition.'}
         </div>
 
         {/* ════ PRODUCT TABLE ════ */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', flex: 1 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto', flex: 1 }}>
           <colgroup>
             <col style={{ width: '50px' }} />
             <col />
@@ -230,35 +234,39 @@ export function ChallanPrintable({ challan, company }) {
           </thead>
           <tbody>
             {items.map((item, idx) => (
-              <tr key={idx} style={{ textAlign: 'center', verticalAlign: 'top', height: '36px' }}>
+              <tr key={idx} style={{ textAlign: 'center', verticalAlign: 'top', height: '26px' }}>
                 <td style={{ padding: '8px', borderRight: B2, borderBottom: B1, fontSize: '11px', fontWeight: '600' }}>{idx + 1}</td>
                 <td style={{ padding: '8px 12px', borderRight: B2, borderBottom: B1, textAlign: 'left' }}>
-                  <div style={{ fontWeight: '700', fontSize: '13px', color: '#111' }}>{item.name}</div>
+                  <div style={{ fontWeight: '700', fontSize: '13px', color: '#111' }}>
+                    {item.name}
+                    {item.boxSize && <span style={{ marginLeft: '8px', fontWeight: '500', color: '#666', fontSize: '11px' }}>{item.boxSize}</span>}
+                    {item.palletSize && <span style={{ marginLeft: '8px', fontWeight: '500', color: '#666', fontSize: '11px' }}>{item.palletSize}</span>}
+                  </div>
                   {item.description && <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>{item.description}</div>}
-                  {(item.boxSize || item.palletSize) && (
-                    <div style={{ fontSize: '11px', color: '#555', fontWeight: '600', marginTop: '4px' }}>
-                      {item.boxSize && <span style={{ marginRight: '12px' }}>Box: {item.boxSize}</span>}
-                      {item.palletSize && <span>Pallet: {item.palletSize}</span>}
-                    </div>
-                  )}
                 </td>
                 <td style={{ padding: '8px', borderBottom: B1, fontWeight: '800', fontSize: '14px', color: '#111' }}>{item.qty}</td>
               </tr>
             ))}
             {Array.from({ length: dummy }).map((_, i) => (
-              <tr key={'d' + i} style={{ height: '36px' }}>
-                <td style={{ borderRight: B2, borderBottom: i === dummy - 1 ? 'none' : B1 }}>&nbsp;</td>
-                <td style={{ borderRight: B2, borderBottom: i === dummy - 1 ? 'none' : B1 }}>&nbsp;</td>
-                <td style={{ borderBottom: i === dummy - 1 ? 'none' : B1 }}>&nbsp;</td>
+              <tr key={'d' + i} style={{ height: '26px' }}>
+                <td style={{ borderRight: B2, borderBottom: B1 }}>&nbsp;</td>
+                <td style={{ borderRight: B2, borderBottom: B1 }}>&nbsp;</td>
+                <td style={{ borderBottom: B1 }}>&nbsp;</td>
               </tr>
             ))}
+            {/* Filler row to absorb remaining flex height */}
+            <tr style={{ height: 'auto' }}>
+                <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+            </tr>
           </tbody>
         </table>
 
         {/* ════ BOTTOM SECTION ════ */}
-        <div style={{ display: 'flex', borderTop: B2, minHeight: '120px' }}>
+        <div style={{ display: 'flex', borderTop: B2, minHeight: '150px' }}>
           {/* Left: Receiver Signature */}
-          <div style={{ flex: 1, borderRight: B2, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '16px' }}>
+          <div style={{ flex: 1, borderRight: B2, position: 'relative', display: 'flex', flexDirection: 'column', padding: '12px 16px', justifyContent: 'flex-end' }}>
             <div style={{ borderTop: '1px solid #111', width: '200px', fontSize: '11px', fontWeight: '700', color: O, textAlign: 'center', paddingTop: '4px' }}>
               Receiver&apos;s Signature
             </div>

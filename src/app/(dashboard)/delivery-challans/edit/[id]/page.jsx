@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -13,36 +13,54 @@ import Link from 'next/link';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
-export default function NewQuotationPage() {
+export default function EditDeliveryChallanPage() {
   const { showAlert } = useCustomModal();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { id } = useParams();
 
   const [customerId, setCustomerId] = useState('');
-  const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
-  const [customQuoteNumber, setCustomQuoteNumber] = useState('');
-  const [validDays, setValidDays] = useState(30);
+  const [challanDate, setChallanDate] = useState(new Date().toISOString().split('T')[0]);
+  const [vehicleNo, setVehicleNo] = useState('');
+  const [poNumber, setPoNumber] = useState('');
   const [notes, setNotes] = useState('');
 
   const [items, setItems] = useState([
-    { productId: '', name: '', hsnCode: '44151000', qty: 1, rate: 0, taxRate: 5, unit: 'Pcs' }
+    { productId: '', name: '', hsnCode: '44151000', qty: 1, unit: 'Pcs', remarks: '' }
   ]);
 
   const { data: counterData } = useQuery({
-    queryKey: ['nextCounterQuote'],
+    queryKey: ['nextCounterChallan'],
     queryFn: async () => {
-      const res = await api.get('/counters/next?type=quote');
+      const res = await api.get('/counters/next?type=challan');
       return res.data.data;
     }
   });
 
-  const nextQuoteNo = counterData?.nextNumber || '001';
+  const nextChallanNo = counterData?.nextNumber || '001';
 
-  React.useEffect(() => {
-    if (nextQuoteNo && !customQuoteNumber && counterData) {
-      setCustomQuoteNumber(nextQuoteNo);
+  const { data: existingChallan, isLoading: isFetchingChallan } = useQuery({
+    queryKey: ['challan', id],
+    queryFn: async () => {
+      const res = await api.get(`/challans/${id}`);
+      return res.data.data;
+    },
+    enabled: !!id
+  });
+
+  useEffect(() => {
+    if (existingChallan) {
+      setCustomerId(existingChallan.customerId || '');
+      if (existingChallan.challanDate) {
+        setChallanDate(new Date(existingChallan.challanDate).toISOString().split('T')[0]);
+      }
+      setVehicleNo(existingChallan.vehicleNo || '');
+      setNotes(existingChallan.notes || '');
+      if (existingChallan.items && existingChallan.items.length > 0) {
+        setItems(existingChallan.items);
+      }
     }
-  }, [nextQuoteNo, counterData]);
+  }, [existingChallan]);
 
   const { data: customers } = useQuery({
     queryKey: ['customersList'],
@@ -60,20 +78,20 @@ export default function NewQuotationPage() {
     }
   });
 
-  const createQuotationMutation = useMutation({
+  const updateChallanMutation = useMutation({
     mutationFn: async (payload) => {
-      const res = await api.post('/quotations', payload);
+      const res = await api.put(`/challans/${id}`, payload);
       return res.data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries();
-      router.push(`/quotations/${data.data._id}`);
+      router.push(`/delivery-challans/${data.data._id || data.data.id || id}`);
     },
     onError: (err) => {
-      console.error('Quotation Creation Error:', err);
+      console.error('Delivery Challan Update Error:', err);
       showAlert({
-        title: 'Quotation Creation Error',
-        message: err.response?.data?.message || err.message || 'Error generating quotation. Please check all required fields.',
+        title: 'Challan Update Error',
+        message: err.response?.data?.message || err.message || 'Error updating delivery challan. Please check all fields.',
         variant: 'danger'
       });
     }
@@ -95,8 +113,6 @@ export default function NewQuotationPage() {
       productId: prod._id || prod.id,
       name: prod.name,
       hsnCode: prod.hsnCode || '44151000',
-      rate: prod.defaultRate || 0,
-      taxRate: prod.gstRate || 5,
       unit: prod.unit || 'Pcs'
     };
     setItems(updated);
@@ -109,7 +125,7 @@ export default function NewQuotationPage() {
   };
 
   const addItemRow = () => {
-    setItems([...items, { productId: '', name: '', hsnCode: '44151000', qty: 1, rate: 0, taxRate: 5, unit: 'Pcs' }]);
+    setItems([...items, { productId: '', name: '', hsnCode: '44151000', qty: 1, unit: 'Pcs', remarks: '' }]);
   };
 
   const removeItemRow = (index) => {
@@ -120,10 +136,8 @@ export default function NewQuotationPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!customerId) {
-      return showAlert({ title: 'Customer Required', message: 'Please select a customer before generating the price quotation.' });
+      return showAlert({ title: 'Customer Required', message: 'Please select a customer before generating the delivery challan.' });
     }
-
-    const validUntil = new Date(new Date(quoteDate).getTime() + validDays * 24 * 60 * 60 * 1000);
 
     const sanitizedItems = items.map(item => {
       let itemName = item.name;
@@ -136,44 +150,44 @@ export default function NewQuotationPage() {
         name: itemName || 'Packaging Product',
         hsnCode: item.hsnCode || '44151000',
         qty: Number(item.qty) || 1,
-        rate: Number(item.rate) || 0,
-        taxRate: Number(item.taxRate) || 5,
-        unit: item.unit || 'Pcs'
+        unit: item.unit || 'Pcs',
+        remarks: item.remarks || ''
       };
     });
 
-    createQuotationMutation.mutate({
+    updateChallanMutation.mutate({
       customerId,
-      quoteNumber: customQuoteNumber || nextQuoteNo,
-      quoteDate,
-      validUntil,
+      challanDate,
+      vehicleNo,
       notes,
       items: sanitizedItems
     });
   };
 
+  if (isFetchingChallan) return <p className="text-slate-400 p-8 text-center">Loading Challan details...</p>;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-12 antialiased">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <Link href="/quotations">
+          <Link href={`/delivery-challans/${params.id}`}>
             <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Issue Quotation</h1>
-            <p className="text-xs text-slate-500 mt-0.5 truncate">Review terms, add items, and create a quotation</p>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Edit Delivery Challan</h1>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">Update challan details and items</p>
           </div>
         </div>
-        <Button type="submit" className="w-full sm:w-auto" disabled={createQuotationMutation.isPending}>
-          {createQuotationMutation.isPending ? 'Generating...' : 'Save & Issue Quotation'}
+        <Button type="submit" className="w-full sm:w-auto" disabled={updateChallanMutation.isPending}>
+          {updateChallanMutation.isPending ? 'Updating...' : 'Update Challan'}
         </Button>
       </div>
 
       <Card className="p-6 border-slate-200/80 space-y-5">
-        <h2 className="text-sm font-bold text-orange-600 border-b border-slate-100 pb-2">Customer & Quotation Date</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h2 className="text-sm font-bold text-orange-600 border-b border-slate-100 pb-2">Dispatch & Vehicle Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Select
-            label="Select Client Customer*"
+            label="Select Consignee / Customer*"
             required
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
@@ -184,30 +198,23 @@ export default function NewQuotationPage() {
             ))}
           </Select>
 
-          <Input
-            label="Quotation No. (Customizable) *"
-            value={customQuoteNumber}
-            onChange={(e) => setCustomQuoteNumber(e.target.value)}
-            placeholder="e.g. 001"
-            required
-          />
-
-          <Input label="Quotation Date *" type="date" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} required />
+          <Input label="Challan Date *" type="date" value={challanDate} onChange={(e) => setChallanDate(e.target.value)} required />
+          <Input label="Vehicle Number" value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} placeholder="e.g. MH 04 AB 1234" />
         </div>
       </Card>
 
       <Card className="p-6 border-slate-200/80 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-          <h2 className="text-sm font-bold text-orange-600">Quotation Line Items</h2>
+          <h2 className="text-sm font-bold text-orange-600">Dispatched Items Particulars</h2>
           <Button type="button" variant="outline" size="sm" onClick={addItemRow}>
-            <Plus className="w-4 h-4 mr-1" /> Add Line Item
+            <Plus className="w-4 h-4 mr-1" /> Add Particular
           </Button>
         </div>
 
         <div className="space-y-3">
           {items.map((item, idx) => (
             <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-slate-50/80 p-3 rounded-xl border border-slate-200">
-              <div className="col-span-3">
+              <div className="col-span-4">
                 <Select
                   label="Product"
                   value={item.productId}
@@ -220,17 +227,17 @@ export default function NewQuotationPage() {
                 </Select>
               </div>
 
-              <div className="col-span-2">
+              <div className="col-span-4">
                 <input
                   type="text"
-                  placeholder="HSN Code"
-                  value={item.hsnCode}
-                  onChange={(e) => updateItemField(idx, 'hsnCode', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-mono"
+                  placeholder="Item Particular / Dimensions"
+                  value={item.name}
+                  onChange={(e) => updateItemField(idx, 'name', e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-medium"
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="col-span-3">
                 <input
                   type="text"
                   placeholder="Qty"
@@ -238,26 +245,6 @@ export default function NewQuotationPage() {
                   onChange={(e) => updateItemField(idx, 'qty', e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-semibold"
                 />
-              </div>
-
-              <div className="col-span-2">
-                <input
-                  type="number"
-                  placeholder="Unit Rate ₹"
-                  value={item.rate}
-                  onChange={(e) => updateItemField(idx, 'rate', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-semibold"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <Select
-                  label="GST Rate"
-                  value={item.taxRate}
-                  onChange={(e) => updateItemField(idx, 'taxRate', Number(e.target.value))}
-                >
-                  <option value={5}>5% GST (2.5% + 2.5%)</option>
-                </Select>
               </div>
 
               <div className="col-span-1 flex items-center justify-end">

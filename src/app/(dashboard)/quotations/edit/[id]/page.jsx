@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -13,14 +13,14 @@ import Link from 'next/link';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
-export default function NewQuotationPage() {
+export default function EditQuotationPage() {
   const { showAlert } = useCustomModal();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { id } = useParams();
 
   const [customerId, setCustomerId] = useState('');
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
-  const [customQuoteNumber, setCustomQuoteNumber] = useState('');
   const [validDays, setValidDays] = useState(30);
   const [notes, setNotes] = useState('');
 
@@ -38,11 +38,32 @@ export default function NewQuotationPage() {
 
   const nextQuoteNo = counterData?.nextNumber || '001';
 
-  React.useEffect(() => {
-    if (nextQuoteNo && !customQuoteNumber && counterData) {
-      setCustomQuoteNumber(nextQuoteNo);
+  const { data: existingQuote, isLoading: isFetchingQuote } = useQuery({
+    queryKey: ['quotation', id],
+    queryFn: async () => {
+      const res = await api.get(`/quotations/${id}`);
+      return res.data.data;
+    },
+    enabled: !!id
+  });
+
+  useEffect(() => {
+    if (existingQuote) {
+      setCustomerId(existingQuote.customerId || '');
+      if (existingQuote.quoteDate) {
+        setQuoteDate(new Date(existingQuote.quoteDate).toISOString().split('T')[0]);
+      }
+      if (existingQuote.validUntil && existingQuote.quoteDate) {
+        const diffTime = Math.abs(new Date(existingQuote.validUntil) - new Date(existingQuote.quoteDate));
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        setValidDays(diffDays);
+      }
+      setNotes(existingQuote.notes || '');
+      if (existingQuote.items && existingQuote.items.length > 0) {
+        setItems(existingQuote.items);
+      }
     }
-  }, [nextQuoteNo, counterData]);
+  }, [existingQuote]);
 
   const { data: customers } = useQuery({
     queryKey: ['customersList'],
@@ -60,20 +81,20 @@ export default function NewQuotationPage() {
     }
   });
 
-  const createQuotationMutation = useMutation({
+  const updateQuotationMutation = useMutation({
     mutationFn: async (payload) => {
-      const res = await api.post('/quotations', payload);
+      const res = await api.put(`/quotations/${id}`, payload);
       return res.data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries();
-      router.push(`/quotations/${data.data._id}`);
+      router.push(`/quotations/${data.data._id || data.data.id || id}`);
     },
     onError: (err) => {
-      console.error('Quotation Creation Error:', err);
+      console.error('Quotation Update Error:', err);
       showAlert({
-        title: 'Quotation Creation Error',
-        message: err.response?.data?.message || err.message || 'Error generating quotation. Please check all required fields.',
+        title: 'Quotation Update Error',
+        message: err.response?.data?.message || err.message || 'Error updating quotation. Please check all required fields.',
         variant: 'danger'
       });
     }
@@ -142,9 +163,8 @@ export default function NewQuotationPage() {
       };
     });
 
-    createQuotationMutation.mutate({
+    updateQuotationMutation.mutate({
       customerId,
-      quoteNumber: customQuoteNumber || nextQuoteNo,
       quoteDate,
       validUntil,
       notes,
@@ -152,26 +172,28 @@ export default function NewQuotationPage() {
     });
   };
 
+  if (isFetchingQuote) return <p className="text-slate-400 p-8 text-center">Loading Quotation details...</p>;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-12 antialiased">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <Link href="/quotations">
+          <Link href={`/quotations/${params.id}`}>
             <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Issue Quotation</h1>
-            <p className="text-xs text-slate-500 mt-0.5 truncate">Review terms, add items, and create a quotation</p>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Edit Quotation</h1>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">Modify terms, add items, and update quotation</p>
           </div>
         </div>
-        <Button type="submit" className="w-full sm:w-auto" disabled={createQuotationMutation.isPending}>
-          {createQuotationMutation.isPending ? 'Generating...' : 'Save & Issue Quotation'}
+        <Button type="submit" className="w-full sm:w-auto" disabled={updateQuotationMutation.isPending}>
+          {updateQuotationMutation.isPending ? 'Updating...' : 'Update Quotation'}
         </Button>
       </div>
 
       <Card className="p-6 border-slate-200/80 space-y-5">
         <h2 className="text-sm font-bold text-orange-600 border-b border-slate-100 pb-2">Customer & Quotation Date</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             label="Select Client Customer*"
             required
@@ -183,14 +205,6 @@ export default function NewQuotationPage() {
               <option key={c._id} value={c._id}>{c.companyName || c.name}</option>
             ))}
           </Select>
-
-          <Input
-            label="Quotation No. (Customizable) *"
-            value={customQuoteNumber}
-            onChange={(e) => setCustomQuoteNumber(e.target.value)}
-            placeholder="e.g. 001"
-            required
-          />
 
           <Input label="Quotation Date *" type="date" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} required />
         </div>

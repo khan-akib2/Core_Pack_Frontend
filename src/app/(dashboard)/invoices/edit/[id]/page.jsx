@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -14,10 +14,11 @@ import Link from 'next/link';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
-export default function NewInvoicePage() {
+export default function EditInvoicePage() {
   const { showAlert } = useCustomModal();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { id } = useParams();
 
   const [customerId, setCustomerId] = useState('');
   const [customInvoiceNumber, setCustomInvoiceNumber] = useState('');
@@ -42,11 +43,36 @@ export default function NewInvoicePage() {
 
   const nextInvoiceNo = counterData?.nextNumber || '001';
 
+  const { data: existingInvoice, isLoading: isFetchingInvoice } = useQuery({
+    queryKey: ['invoice', id],
+    queryFn: async () => {
+      const res = await api.get(`/invoices/${id}`);
+      return res.data.data;
+    },
+    enabled: !!id
+  });
+
   useEffect(() => {
-    if (nextInvoiceNo && !customInvoiceNumber) {
+    if (existingInvoice) {
+      setCustomerId(existingInvoice.customerId || '');
+      setCustomInvoiceNumber(existingInvoice.invoiceNumber || '');
+      if (existingInvoice.invoiceDate) {
+        setInvoiceDate(new Date(existingInvoice.invoiceDate).toISOString().split('T')[0]);
+      }
+      setChallanNumber(existingInvoice.challanNumber || '');
+      if (existingInvoice.challanDate) {
+        setChallanDate(new Date(existingInvoice.challanDate).toISOString().split('T')[0]);
+      }
+      setVehicleNo(existingInvoice.vehicleNo || '');
+      setTransportationCharges(existingInvoice.transportationCharges || '');
+      setNotes(existingInvoice.notes || '');
+      if (existingInvoice.items && existingInvoice.items.length > 0) {
+        setItems(existingInvoice.items);
+      }
+    } else if (nextInvoiceNo && !customInvoiceNumber) {
       setCustomInvoiceNumber(nextInvoiceNo);
     }
-  }, [nextInvoiceNo]);
+  }, [existingInvoice, nextInvoiceNo]);
 
   const { data: customers } = useQuery({
     queryKey: ['customersList'],
@@ -64,20 +90,20 @@ export default function NewInvoicePage() {
     }
   });
 
-  const createInvoiceMutation = useMutation({
+  const updateInvoiceMutation = useMutation({
     mutationFn: async (payload) => {
-      const res = await api.post('/invoices', payload);
+      const res = await api.put(`/invoices/${id}`, payload);
       return res.data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries();
-      router.push(`/invoices/${data.data._id}`);
+      router.push(`/invoices/${data.data._id || data.data.id || id}`);
     },
     onError: (err) => {
-      console.error('Invoice Creation Error:', err);
+      console.error('Invoice Update Error:', err);
       showAlert({
-        title: 'Invoice Generation Failed',
-        message: err.response?.data?.message || err.message || 'Error saving invoice. Please check all fields.',
+        title: 'Invoice Update Failed',
+        message: err.response?.data?.message || err.message || 'Error updating invoice. Please check all fields.',
         variant: 'danger'
       });
     }
@@ -146,7 +172,7 @@ export default function NewInvoicePage() {
       };
     });
 
-    createInvoiceMutation.mutate({
+    updateInvoiceMutation.mutate({
       customerId,
       customInvoiceNumber: customInvoiceNumber || nextInvoiceNo,
       invoiceDate,
@@ -159,20 +185,22 @@ export default function NewInvoicePage() {
     });
   };
 
+  if (isFetchingInvoice) return <p className="text-slate-400 p-8 text-center">Loading Invoice details...</p>;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-12 antialiased">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <Link href="/invoices">
+          <Link href={`/invoices/${params.id}`}>
             <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Generate GST Tax Invoice</h1>
-            <p className="text-xs text-slate-500 mt-0.5 truncate">Customize fields, add transportation charges & issue tax bill</p>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight truncate">Edit Tax Invoice</h1>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">Modify invoice details and items</p>
           </div>
         </div>
-        <Button type="submit" className="w-full sm:w-auto" disabled={createInvoiceMutation.isPending}>
-          {createInvoiceMutation.isPending ? 'Generating...' : 'Save & Issue Invoice'}
+        <Button type="submit" className="w-full sm:w-auto" disabled={updateInvoiceMutation.isPending}>
+          {updateInvoiceMutation.isPending ? 'Updating...' : 'Update Invoice'}
         </Button>
       </div>
 

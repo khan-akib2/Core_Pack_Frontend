@@ -41,6 +41,11 @@ export const metadata = {
     description: 'Enterprise Business Management System for Core Pack India',
     images: ['/logo.png'],
   },
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   robots: {
     index: true, // You might want this false if it's an internal portal, but user asked for SEO friendly
     follow: true,

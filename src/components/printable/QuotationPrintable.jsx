@@ -59,7 +59,7 @@ export function QuotationPrintable({ quotation, company }) {
   };
 
   const items = quotation.items || [];
-  const minRows = 10;
+  const minRows = 12;
   const dummy = Math.max(0, minRows - items.length);
 
   const subtotal = Number(quotation.subtotal || 0);
@@ -108,7 +108,9 @@ export function QuotationPrintable({ quotation, company }) {
   return (
     <div className="printable-document select-none" style={{
       width: '794px',
-      minHeight: '1050px',
+      minHeight: '1122px',
+      display: 'flex',
+      flexDirection: 'column',
       backgroundColor: 'white',
       fontFamily: "'Inter', sans-serif",
       color: '#000',
@@ -116,7 +118,7 @@ export function QuotationPrintable({ quotation, company }) {
       position: 'relative',
     }}>
       {/* Final outer line of the whole bill */}
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, border: B2, pointerEvents: 'none', zIndex: 100 }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, border: B2, pointerEvents: 'none', zIndex: 10 }} />
       <style>{`
         @media print {
           @page { margin: 0; size: A4 portrait; }
@@ -127,9 +129,6 @@ export function QuotationPrintable({ quotation, company }) {
             print-color-adjust: exact; 
           }
           .printable-document {
-            zoom: 0.84;
-            transform: scale(0.84);
-            transform-origin: top center;
             margin: 0 auto !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
@@ -219,7 +218,7 @@ export function QuotationPrintable({ quotation, company }) {
       </div>
 
       {/* ════════ MAIN BOX ════════ */}
-      <div style={{ border: B2, margin: '12px 8px 8px 8px', background: 'white', position: 'relative', zIndex: 10 }}>
+      <div style={{ flex: 1, border: B2, margin: '12px 8px 8px 8px', background: 'white', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column' }}>
 
         {/* ── TOP ROW: Title ── */}
         <div style={{ display: 'flex', borderBottom: B2, alignItems: 'stretch' }}>
@@ -242,7 +241,7 @@ export function QuotationPrintable({ quotation, company }) {
         <div style={{ display: 'flex', borderBottom: B2 }}>
 
           {/* LEFT: receiver */}
-          <div style={{ flex: '0 0 58%', padding: '6px 12px 6px 10px' }}>
+          <div style={{ flex: '1', padding: '6px 12px 6px 10px' }}>
             {/* badge */}
             <div style={{ display: 'inline-block', background: N, color: 'white', fontSize: '9.5px', fontWeight: '700', padding: '3px 10px', borderRadius: '3px', marginBottom: '9px' }}>
               Quotation For
@@ -250,14 +249,14 @@ export function QuotationPrintable({ quotation, company }) {
 
             {/* Name */}
             <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px', marginBottom: '5px' }}>
-              <span style={LBL()}>Name</span>
+              <span style={LBL({ w: 85 })}>Company Name</span>
               <span style={COL}>:</span>
               <div style={{ ...LINE, fontWeight: '700', textTransform: 'uppercase' }}>{custName}</div>
             </div>
 
             {/* Address */}
             <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '5px', minHeight: '50px' }}>
-              <span style={{ ...LBL(), paddingTop: '2px' }}>Address</span>
+              <span style={{ ...LBL({ w: 85 }), paddingTop: '2px' }}>Address</span>
               <span style={{ ...COL, paddingTop: '2px' }}>:</span>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ borderBottom: UL, minHeight: '16px', paddingBottom: '2px', fontSize: '10.5px' }}>{addr1}</div>
@@ -265,67 +264,38 @@ export function QuotationPrintable({ quotation, company }) {
               </div>
             </div>
 
-            {/* GSTIN & Phone */}
-            <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px', gap: '5px' }}>
-              <span style={LBL()}>GSTIN</span>
+            {/* GSTIN */}
+            <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px', marginBottom: '5px' }}>
+              <span style={LBL({ w: 85 })}>GSTIN</span>
               <span style={COL}>:</span>
               <div style={{ ...LINE, fontFamily: 'monospace', fontWeight: '700' }}>{quotation.customerSnapshot?.gstin || 'URP'}</div>
-              <span style={{ fontWeight: '700', color: N, fontSize: '10.5px', whiteSpace: 'nowrap', marginLeft: '14px', flexShrink: 0 }}>Phone</span>
-              <span style={{ ...COL, marginLeft: '4px' }}>:</span>
-              <div style={{ borderBottom: UL, width: '100px', minHeight: '16px', paddingBottom: '2px', fontSize: '10.5px', fontFamily: 'monospace' }}>{quotation.customerSnapshot?.phone || ''}</div>
             </div>
-          </div>
 
-          {/* RIGHT: metadata */}
-          <div style={{ flex: '1', borderLeft: B2, padding: '6px 10px 6px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            {/* Quote No */}
-            <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px', marginBottom: '10px' }}>
-              <span style={LBL({ w: 92 })}>Quote No.</span>
-              <span style={COL}>:</span>
-              <div style={{ ...LINE, fontFamily: 'monospace', fontWeight: '700' }}>{quotation.quoteNumber || ''}</div>
-            </div>
             {/* Date */}
-            <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px', marginBottom: '10px' }}>
-              <span style={LBL({ w: 92 })}>Date</span>
+            <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px' }}>
+              <span style={LBL({ w: 85 })}>Date</span>
               <span style={COL}>:</span>
               <div style={{ ...LINE, fontWeight: '600' }}>{formatDate(quotation.quoteDate)}</div>
-            </div>
-            {/* Valid Until */}
-            <div style={{ display: 'flex', alignItems: 'center', minHeight: '23px' }}>
-              <span style={LBL({ w: 92 })}>Valid Until</span>
-              <span style={COL}>:</span>
-              <div style={{ ...LINE, fontWeight: '600' }}>{formatDate(quotation.validUntil)}</div>
             </div>
           </div>
         </div>
 
         {/* ════ PRODUCT TABLE ════ */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <table style={{ flex: 1, width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
           <colgroup>
             <col style={{ width: '40px' }} />
             <col />
-            <col style={{ width: '78px' }} />
             <col style={{ width: '46px' }} />
-            <col style={{ width: '57px' }} />
-            <col style={{ width: '37px' }} />
-            <col style={{ width: '63px' }} />
-            <col style={{ width: '40px' }} />
+            <col style={{ width: '80px' }} />
+            <col style={{ width: '30px' }} />
           </colgroup>
           <thead>
             <tr style={{ background: N, color: 'white', fontSize: '10px', fontWeight: '700', textAlign: 'center' }}>
               <th style={{ padding: '9px 3px', borderRight: '1px solid rgba(255,255,255,0.25)', verticalAlign: 'middle', lineHeight: '1.35' }}>Sr.<br />No.</th>
               <th style={{ padding: '9px 7px', borderRight: '1px solid rgba(255,255,255,0.25)', textAlign: 'left', verticalAlign: 'middle' }}>Name of Product / Service</th>
-              <th style={{ padding: '9px 3px', borderRight: '1px solid rgba(255,255,255,0.25)', verticalAlign: 'middle' }}>HSN Code</th>
               <th style={{ padding: '9px 3px', borderRight: '1px solid rgba(255,255,255,0.25)', verticalAlign: 'middle' }}>Qty</th>
-              <th colSpan={2} style={{ padding: '0', borderRight: '1px solid rgba(255,255,255,0.25)', verticalAlign: 'top' }}>
-                <div style={{ padding: '9px 4px 4px', textAlign: 'center' }}>Rate (&#8377;)</div>
-                <div style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,0.35)', fontSize: '9px', fontWeight: '600' }}>
-                  <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', borderRight: '1px solid rgba(255,255,255,0.25)' }}>Rs.</div>
-                  <div style={{ flex: 1, textAlign: 'center', padding: '4px 0' }}>Ps.</div>
-                </div>
-              </th>
               <th colSpan={2} style={{ padding: '0', verticalAlign: 'top' }}>
-                <div style={{ padding: '9px 4px 4px', textAlign: 'center' }}>Amount (&#8377;)</div>
+                <div style={{ padding: '9px 4px 4px', textAlign: 'center' }}>Rate (&#8377;)</div>
                 <div style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,0.35)', fontSize: '9px', fontWeight: '600' }}>
                   <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', borderRight: '1px solid rgba(255,255,255,0.25)' }}>Rs.</div>
                   <div style={{ flex: 1, textAlign: 'center', padding: '4px 0' }}>Ps.</div>
@@ -336,35 +306,40 @@ export function QuotationPrintable({ quotation, company }) {
           <tbody>
             {items.map((item, idx) => {
               const rF = fmtRsPs(item.rate);
-              const aF = fmtRsPs(item.totalAmount || (item.qty * item.rate));
               return (
-                <tr key={idx} style={{ borderBottom: B1, textAlign: 'center', verticalAlign: 'top', height: '28px' }}>
+                <tr key={idx} style={{ borderBottom: B1, textAlign: 'center', verticalAlign: 'top', height: '24px' }}>
                   <td style={{ padding: '6px 3px', borderRight: B1, fontSize: '10px' }}>{idx + 1}</td>
                   <td style={{ padding: '6px 7px', borderRight: B1, textAlign: 'left', fontWeight: '600', fontSize: '10.5px' }}>
-                    <div>{item.name}</div>
+                    <div>
+                      {item.name}
+                      {item.boxSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.boxSize}</span>}
+                      {item.palletSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.palletSize}</span>}
+                    </div>
                     {item.description && <div style={{ fontSize: '9px', color: '#666', fontWeight: '400' }}>{item.description}</div>}
                   </td>
-                  <td style={{ padding: '6px 3px', borderRight: B1, fontFamily: 'monospace', fontSize: '10px' }}>{item.hsnCode || '-'}</td>
                   <td style={{ padding: '6px 3px', borderRight: B1, fontWeight: '700', fontSize: '10.5px' }}>{item.qty} {item.unit || ''}</td>
                   <td style={{ padding: '6px 3px', borderRight: '1px solid #8896C4', fontFamily: 'monospace', textAlign: 'right', fontSize: '10px' }}>{rF.rs}</td>
-                  <td style={{ padding: '6px 3px', borderRight: B1, fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px' }}>{rF.ps}</td>
-                  <td style={{ padding: '6px 3px', borderRight: '1px solid #8896C4', fontFamily: 'monospace', fontWeight: '600', textAlign: 'right', fontSize: '10px' }}>{aF.rs}</td>
-                  <td style={{ padding: '6px 3px', fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px' }}>{aF.ps}</td>
+                  <td style={{ padding: '6px 3px', fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px' }}>{rF.ps}</td>
                 </tr>
               );
             })}
             {Array.from({ length: dummy }).map((_, i) => (
-              <tr key={'d' + i} style={{ borderBottom: B1, height: '28px' }}>
+              <tr key={'d' + i} style={{ borderBottom: B1, height: '24px' }}>
                 <td style={{ borderRight: B1 }}>&nbsp;</td>
                 <td style={{ borderRight: B1 }}>&nbsp;</td>
-                <td style={{ borderRight: B1 }}>&nbsp;</td>
-                <td style={{ borderRight: B1 }}>&nbsp;</td>
-                <td style={{ borderRight: '1px solid #8896C4' }}>&nbsp;</td>
                 <td style={{ borderRight: B1 }}>&nbsp;</td>
                 <td style={{ borderRight: '1px solid #8896C4' }}>&nbsp;</td>
                 <td>&nbsp;</td>
               </tr>
             ))}
+            {/* Filler row to absorb remaining flex height */}
+            <tr style={{ height: 'auto' }}>
+                <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderRight: '1px solid #8896C4', borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+            </tr>
           </tbody>
         </table>
 
@@ -372,65 +347,18 @@ export function QuotationPrintable({ quotation, company }) {
         <div style={{ display: 'flex', borderTop: B2, alignItems: 'stretch' }}>
 
           {/* LEFT COLUMN */}
-          <div style={{ flex: '1', borderRight: B2, display: 'flex', flexDirection: 'column' }}>
-
-            {/* Amount in Words */}
-            <div style={{ padding: '6px 12px 6px 10px', borderBottom: B2 }}>
-              <div style={{ fontWeight: '700', color: N, fontSize: '10.5px', marginBottom: '3px' }}>Total in Words :</div>
-              <div style={{ position: 'relative', height: '44px' }}>
-                <div style={{ position: 'absolute', left: 0, right: 0, top: '21px', borderBottom: '1px solid #9CA3AF' }} />
-                <div style={{ position: 'absolute', left: 0, right: 0, top: '42px', borderBottom: '1px solid #9CA3AF' }} />
-                <div style={{ position: 'absolute', top: 0, left: '2px', right: '2px', fontSize: '9.5px', fontWeight: '700', fontStyle: 'italic', color: '#111', lineHeight: '21px', height: '42px', overflow: 'hidden' }}>{words}</div>
-              </div>
-            </div>
-
-            {/* Terms and Conditions & Bank Details */}
-            <div style={{ display: 'flex', flex: 1, minHeight: '100px' }}>
-              <div style={{ flex: '0 0 55%', padding: '6px 10px', borderRight: B1 }}>
-                <div style={{ display: 'inline-block', background: N, color: 'white', fontSize: '9.5px', fontWeight: '700', padding: '3px 10px', borderRadius: '3px', marginBottom: '6px' }}>Bank Details :</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {[
-                    { lbl: 'Bank A/c No.', val: company?.bankDetails?.accountNo || company?.bankDetails?.accountNumber || '', mono: true },
-                    { lbl: 'Bank Branch', val: company?.bankDetails?.branch || '' },
-                    { lbl: 'Bank IFSC', val: company?.bankDetails?.ifsc || company?.bankDetails?.ifscCode || '', mono: true },
-                  ].map(({ lbl, val, mono }) => (
-                    <div key={lbl} style={{ display: 'flex', alignItems: 'center', minHeight: '16px' }}>
-                      <span style={{ fontWeight: '700', color: N, width: '75px', fontSize: '9.5px', flexShrink: 0 }}>{lbl}</span>
-                      <span style={{ fontWeight: '700', color: N, margin: '0 5px', fontSize: '9.5px' }}>:</span>
-                      <div style={{ flex: 1, borderBottom: UL, minHeight: '14px', paddingBottom: '1px', fontFamily: mono ? 'monospace' : 'inherit', fontWeight: mono ? '700' : '400', fontSize: '9.5px' }}>{val}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ flex: '1', padding: '6px 10px' }}>
-                <div style={{ display: 'inline-block', background: N, color: 'white', fontSize: '9.5px', fontWeight: '700', padding: '3px 10px', borderRadius: '3px', marginBottom: '6px' }}>Terms & Conditions :</div>
-                <div style={{ fontSize: '9px', color: '#333', lineHeight: '1.4', whiteSpace: 'pre-line' }}>
-                  {quotation.terms || '1. Goods once sold will not be taken back.\n2. Interest @ 18% p.a. will be charged if payment is not made within the stipulated time.'}
-                </div>
-              </div>
+          <div style={{ flex: '1', borderRight: B2, padding: '12px 16px' }}>
+            <div style={{ display: 'inline-block', background: N, color: 'white', fontSize: '10.5px', fontWeight: '700', padding: '4px 12px', borderRadius: '3px', marginBottom: '8px' }}>Terms & Conditions :</div>
+            <div style={{ fontSize: '9.5px', color: '#333', lineHeight: '1.5', textAlign: 'justify', wordBreak: 'break-word', overflowWrap: 'anywhere', fontWeight: '500' }}>
+              {company?.certificationText || 'We hereby certify that my / our registration certificate under the Goods and Service Tax, is in force on the date on which the sale of goods specified in this Tax Invoice is made by me / us and that the transaction of sale covered by this Tax Invoice has been effected by me / us and that the sale has not been effected by any fraud, willful-misstatement or suppression of facts and that all the particulars shown in this Tax Invoice are true and correct. Tax, if any, payable on the said items paid or shall be paid.'}
             </div>
           </div>
 
           {/* RIGHT COLUMN */}
           <div style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column' }}>
 
-            {/* Totals Section */}
-            <div style={{ borderBottom: B2, display: 'flex', flexDirection: 'column' }}>
-              <TR label="Sub Total" value={subtotal} />
-              <TR label="Estimated Tax (GST)" value={gst} />
-              
-              {/* Grand Total */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: N, color: 'white', minHeight: '32px' }}>
-                <span style={{ fontWeight: '800', fontSize: '13.5px', letterSpacing: '0.3px' }}>Grand Total</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-                  <span style={{ fontWeight: '800', fontSize: '13.5px' }}>&#8377;</span>
-                  <div style={{ borderBottom: '1px solid rgba(255,255,255,0.55)', width: '108px', textAlign: 'right', paddingBottom: '1px', fontFamily: 'monospace', fontSize: '12px', fontWeight: '700', minHeight: '18px' }}>{fmt2(grand)}</div>
-                </div>
-              </div>
-            </div>
-
             {/* Signature Section */}
-            <div style={{ display: 'flex', flex: 1, minHeight: '100px', flexDirection: 'column', justifyContent: 'space-between', padding: '16px 20px', alignItems: 'flex-end', background: '#fdfdfd' }}>
+            <div style={{ display: 'flex', flex: 1, minHeight: '130px', flexDirection: 'column', justifyContent: 'space-between', padding: '16px 20px', alignItems: 'flex-end', background: '#fdfdfd' }}>
               <div style={{ fontWeight: '800', color: O, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2px', textAlign: 'right' }}>
                 For {company?.companyName || 'CORE PACK INDIA'}
               </div>

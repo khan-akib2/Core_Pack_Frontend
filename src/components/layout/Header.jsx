@@ -73,7 +73,7 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
   };
 
   return (
-    <header className="h-16 sm:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 antialiased">
+    <header className="h-16 sm:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 antialiased print:hidden">
       <div className="flex items-center space-x-3 flex-1 max-w-md">
         {/* Mobile Menu Hamburger Button */}
         <button

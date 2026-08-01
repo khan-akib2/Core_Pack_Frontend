@@ -85,18 +85,17 @@ export default function DeliveryChallansPage() {
                 <th className="p-3.5">Customer</th>
                 <th className="p-3.5">Vehicle No</th>
                 <th className="p-3.5">Dispatch Date</th>
-                <th className="p-3.5">Status</th>
                 <th className="p-3.5 pr-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs font-normal">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Loading delivery challans...</td>
+                  <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">Loading delivery challans...</td>
                 </tr>
               ) : challans.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No delivery challans found.</td>
+                  <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">No delivery challans found.</td>
                 </tr>
               ) : (
                 challans.map((dc) => (
@@ -109,11 +108,6 @@ export default function DeliveryChallansPage() {
                     </td>
                     <td className="p-3.5 font-mono text-xs uppercase text-slate-600">{dc.vehicleNo || 'N/A'}</td>
                     <td className="p-3.5 text-xs text-slate-500">{formatDate(dc.challanDate)}</td>
-                    <td className="p-3.5">
-                      <Badge variant={dc.status === 'Invoiced' ? 'success' : 'info'}>
-                        {dc.status}
-                      </Badge>
-                    </td>
                     <td className="p-3.5 pr-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <Link href={`/delivery-challans/${dc._id}`}>

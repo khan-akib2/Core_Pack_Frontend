@@ -5,6 +5,21 @@ import { Search, X, FileText, Package, Users, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
+import { Compass } from 'lucide-react';
+
+const APP_ROUTES = [
+  { name: 'Dashboard', path: '/', keywords: ['home', 'dashboard', 'main'] },
+  { name: 'Tax Invoices', path: '/invoices', keywords: ['invoice', 'bill', 'tax'] },
+  { name: 'New Invoice', path: '/invoices/new', keywords: ['create invoice', 'new invoice'] },
+  { name: 'Quotations', path: '/quotations', keywords: ['quote', 'quotation', 'estimate'] },
+  { name: 'New Quotation', path: '/quotations/new', keywords: ['create quote', 'new quote'] },
+  { name: 'Delivery Challans', path: '/delivery-challans', keywords: ['challan', 'delivery', 'dispatch'] },
+  { name: 'New Challan', path: '/delivery-challans/new', keywords: ['create challan', 'new challan'] },
+  { name: 'Product Catalog', path: '/products', keywords: ['product', 'item', 'catalog', 'inventory'] },
+  { name: 'Customers', path: '/customers', keywords: ['customer', 'client', 'buyer'] },
+  { name: 'Reports & Tax', path: '/reports', keywords: ['report', 'tax', 'summary', 'export'] },
+  { name: 'Company Settings', path: '/settings', keywords: ['setting', 'company', 'profile', 'config', 'logo'] },
+];
 
 export default function GlobalSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -50,6 +65,12 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     onClose(); 
   };
 
+  const lowerQuery = query.toLowerCase().trim();
+  const matchingRoutes = lowerQuery.length >= 2 
+    ? APP_ROUTES.filter(r => r.name.toLowerCase().includes(lowerQuery) || r.keywords.some(k => k.includes(lowerQuery)))
+    : [];
+
+
   return (
     <div
       onClick={onClose}
@@ -77,9 +98,29 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
         <div className="max-h-96 overflow-y-auto p-4 space-y-4">
           {loading && <p className="text-sm text-slate-500 text-center py-6">Searching Database...</p>}
 
-          {!loading && results && (
+          {!loading && (results || matchingRoutes.length > 0) && (
             <>
-              {results.invoices?.length > 0 && (
+              {matchingRoutes.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Compass className="w-4 h-4" /> Quick Navigation
+                  </h4>
+                  <div className="space-y-1">
+                    {matchingRoutes.map((route, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => navigateTo(route.path)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-orange-50/50 hover:bg-orange-100/60 border border-transparent hover:border-orange-200 cursor-pointer transition-all"
+                      >
+                        <p className="text-sm font-bold text-slate-900">{route.name}</p>
+                        <ArrowRight className="w-4 h-4 text-orange-400" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {results?.invoices?.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <FileText className="w-4 h-4" /> Tax Invoices
@@ -105,7 +146,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 </div>
               )}
 
-              {results.products?.length > 0 && (
+              {results?.products?.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <Package className="w-4 h-4" /> Product Catalog
@@ -128,7 +169,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 </div>
               )}
 
-              {results.customers?.length > 0 && (
+              {results?.customers?.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <Users className="w-4 h-4" /> Clients & Customers
@@ -151,8 +192,54 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 </div>
               )}
 
-              {results.invoices?.length === 0 && results.products?.length === 0 && results.customers?.length === 0 && (
-                <p className="text-sm text-slate-500 text-center py-6">No matching records found.</p>
+              {results?.quotations?.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <FileText className="w-4 h-4" /> Quotations
+                  </h4>
+                  <div className="space-y-1">
+                    {results.quotations.map((quote) => (
+                      <div
+                        key={quote._id}
+                        onClick={() => navigateTo(`/quotations/${quote._id}`)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">{quote.quoteNumber}</p>
+                          <p className="text-xs text-slate-500">{quote.customerSnapshot?.companyName || quote.customerSnapshot?.name}</p>
+                        </div>
+                        <p className="text-sm font-black text-orange-600">{formatCurrency(quote.grandTotal)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {results?.challans?.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <FileText className="w-4 h-4" /> Delivery Challans
+                  </h4>
+                  <div className="space-y-1">
+                    {results.challans.map((challan) => (
+                      <div
+                        key={challan._id}
+                        onClick={() => navigateTo(`/delivery-challans/${challan._id}`)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">{challan.challanNumber}</p>
+                          <p className="text-xs text-slate-500">{challan.customerSnapshot?.companyName || challan.customerSnapshot?.name}</p>
+                        </div>
+                        <p className="text-sm font-black text-slate-600">Vehicle: {challan.vehicleNo || 'N/A'}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {results?.invoices?.length === 0 && results?.products?.length === 0 && results?.customers?.length === 0 && results?.quotations?.length === 0 && results?.challans?.length === 0 && matchingRoutes.length === 0 && (
+                <p className="text-sm text-slate-500 text-center py-6">No matching records or sections found.</p>
               )}
             </>
           )}
