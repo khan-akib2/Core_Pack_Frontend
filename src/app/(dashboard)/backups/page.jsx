@@ -10,7 +10,7 @@ import { useCustomModal } from '@/components/providers/ModalProvider';
 import { format } from 'date-fns';
 
 export default function BackupsPage() {
-  const { showConfirm, showAlert } = useCustomModal();
+  const { confirm, showAlert } = useCustomModal();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -69,27 +69,31 @@ export default function BackupsPage() {
     createMutation.mutate();
   };
 
-  const handleRestore = (filename) => {
-    showConfirm({
+  const handleRestore = async (filename) => {
+    const isConfirmed = await confirm({
       title: 'DANGER: Restore Database',
       message: `Are you absolutely sure you want to overwrite the current database with the backup "${filename}"? Any data created after this backup will be permanently lost!`,
       variant: 'danger',
-      confirmText: 'Yes, Overwrite Database',
-      onConfirm: () => {
-        setIsProcessing(true);
-        restoreMutation.mutate(filename);
-      }
+      confirmText: 'Yes, Overwrite Database'
     });
+
+    if (isConfirmed) {
+      setIsProcessing(true);
+      restoreMutation.mutate(filename);
+    }
   };
 
-  const handleDelete = (filename) => {
-    showConfirm({
+  const handleDelete = async (filename) => {
+    const isConfirmed = await confirm({
       title: 'Delete Backup',
       message: `Are you sure you want to delete the backup file "${filename}"? This action cannot be undone.`,
       variant: 'danger',
-      confirmText: 'Delete Backup',
-      onConfirm: () => deleteMutation.mutate(filename)
+      confirmText: 'Delete Backup'
     });
+
+    if (isConfirmed) {
+      deleteMutation.mutate(filename);
+    }
   };
 
   const formatBytes = (bytes) => {

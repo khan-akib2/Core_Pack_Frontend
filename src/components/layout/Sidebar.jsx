@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Package, 
-  Users, 
-  Truck, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  FileText,
+  Package,
+  Users,
+  Truck,
+  BarChart3,
   Settings,
   FileCode,
   Bell,
@@ -68,7 +68,7 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
         <div className="flex items-center justify-between mr-3.5 mb-6">
           <div className="flex items-center space-x-3 px-2 py-1 flex-1 min-w-0">
             <div className="bg-white p-1.5 rounded-xl shadow-lg shadow-black/20 shrink-0">
-               <img src="/logo.png" alt="Logo" className="h-6 w-auto object-contain" />
+              <img src="/logo.png" alt="Logo" className="h-6 w-auto object-contain" />
             </div>
             <div className="flex-1 min-w-0 pr-2">
               <h1 className="font-bold text-white text-[15px] leading-none tracking-tight truncate">
@@ -118,7 +118,7 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
                     </span>
                   )}
                 </Link>
-                
+
                 {/* MoveX Inverted Corner Cutouts connecting seamlessly to canvas */}
                 {isActive && (
                   <>

@@ -70,7 +70,7 @@ export default function ChallanDetailPage() {
           <ChallanPrintable challan={challan} company={company} />
         </div>
       </div>
-      
+
       <div className="hidden print:block">
         <ChallanPrintable challan={challan} company={company} />
       </div>

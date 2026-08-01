@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, LogOut, User as UserIcon, FileText, CreditCard, Truck, FileCode, X, CheckCheck, Menu, ChevronDown, Settings, ShieldCheck } from 'lucide-react';
+import { Search, Bell, LogOut, User as UserIcon, FileText, CreditCard, Truck, FileCode, X, CheckCheck, Menu, ChevronDown, Settings, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { useNotificationsSync, markAllNotificationsRead, clearAllNotifications } from '@/lib/notificationsSync';
@@ -17,6 +17,15 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
+  
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries();
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   const { readUntil, clearedAt } = useNotificationsSync();
 
@@ -101,6 +110,15 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4 ml-2">
+        {/* Refresh Button */}
+        <button
+          onClick={handleRefresh}
+          className="p-2 sm:p-2.5 rounded-full bg-white text-slate-500 border border-slate-200/80 hover:text-orange-500 hover:border-slate-300 hover:shadow-xs transition-all"
+          title="Refresh Data"
+        >
+          <RefreshCw className={`w-4.5 h-4.5 sm:w-5 sm:h-5 ${isRefreshing ? 'animate-spin text-orange-500' : ''}`} />
+        </button>
+
         {/* Notification Bell Container */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -121,21 +139,21 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
 
           {/* Notifications Dropdown */}
           {isNotificationOpen && (
-            <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="p-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Notifications</h3>
+            <div className="absolute right-[-60px] sm:right-0 mt-3 w-[340px] sm:w-96 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="p-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  <h3 className="text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Notifications</h3>
                   {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-700 rounded-full">
+                    <span className="px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold bg-orange-100 text-orange-700 rounded-full">
                       {unreadCount} new
                     </span>
                   )}
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
                   {notifications.length > 0 && (
                     <button
                       onClick={clearAllNotifications}
-                      className="text-[11px] font-semibold text-slate-500 hover:text-rose-600 transition-colors"
+                      className="text-[10px] sm:text-[11px] font-semibold text-slate-500 hover:text-rose-600 transition-colors"
                     >
                       Clear All
                     </button>
@@ -143,9 +161,9 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllNotificationsRead}
-                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 hover:underline flex items-center"
+                      className="text-[10px] sm:text-[11px] font-bold text-orange-600 hover:text-orange-700 hover:underline flex items-center"
                     >
-                      <CheckCheck className="w-3.5 h-3.5 mr-1" /> Mark read
+                      <CheckCheck className="w-3.5 h-3.5 sm:mr-1" /> <span className="hidden sm:inline">Mark read</span>
                     </button>
                   )}
                   <button onClick={() => setIsNotificationOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
