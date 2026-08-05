@@ -97,7 +97,7 @@ export default function InvoiceDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden items-start">
-        <Card className="p-5 border-slate-800 lg:col-span-1 space-y-4 sticky top-6">
+        <Card className="p-5 border-slate-800 lg:col-span-1 space-y-4 lg:sticky lg:top-6 z-10">
           <h3 className="font-semibold text-amber-400 flex items-center gap-2">
             <CreditCard className="w-4 h-4" /> Record Payment Received
           </h3>
@@ -139,7 +139,7 @@ export default function InvoiceDetailPage() {
           @media (min-width: 1280px) { .responsive-bill { zoom: 0.75; } }
           @media (min-width: 1536px) { .responsive-bill { zoom: 0.9; } }
         `}</style>
-        <div className="lg:col-span-2 overflow-auto flex justify-start xl:justify-center items-start print:hidden custom-scrollbar w-full p-2">
+        <div className="lg:col-span-2 flex justify-start xl:justify-center items-start print:hidden w-full overflow-hidden">
           <div className="responsive-bill origin-top shadow-2xl transition-all duration-300">
             <InvoicePrintable invoice={invoice} company={company} />
           </div>

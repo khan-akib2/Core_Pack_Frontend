@@ -65,7 +65,7 @@ export default function QuotationDetailPage() {
         @media (min-width: 1280px) { .responsive-bill { zoom: 0.75; } }
         @media (min-width: 1536px) { .responsive-bill { zoom: 0.9; } }
       `}</style>
-      <div className="py-4 overflow-auto flex justify-start xl:justify-center items-start print:hidden custom-scrollbar w-full p-2">
+      <div className="py-4 overflow-hidden flex justify-start xl:justify-center items-start print:hidden w-full">
         <div className="responsive-bill origin-top shadow-2xl transition-all duration-300">
           <QuotationPrintable quotation={quotation} company={company} />
         </div>

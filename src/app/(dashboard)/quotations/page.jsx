@@ -64,14 +64,14 @@ export default function QuotationsPage() {
         </Link>
       </div>
 
-      <Card className="p-3.5 border-slate-200/80">
-        <div className="flex items-center space-x-3">
+      <Card className="p-1.5 px-3 border-slate-200/80">
+        <div className="flex items-center space-x-2">
           <Search className="w-4.5 h-4.5 text-slate-400" />
           <Input
             placeholder="Search by Quotation #, Customer..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent border-none shadow-none focus:ring-0 text-xs placeholder:text-slate-400"
+            className="bg-transparent border-none shadow-none focus:ring-0 text-xs placeholder:text-slate-400 py-1.5 px-1"
           />
         </div>
       </Card>

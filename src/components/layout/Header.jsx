@@ -83,7 +83,7 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
 
   return (
     <header className="h-16 sm:h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 antialiased print:hidden">
-      <div className="flex items-center space-x-3 flex-1 max-w-md">
+      <div className="flex items-center space-x-3 flex-1 max-w-md min-w-0">
         {/* Mobile Menu Hamburger Button */}
         <button
           onClick={onMenuToggle}
@@ -97,9 +97,9 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
         <button
           onClick={onOpenSearch}
           type="button"
-          className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-slate-100/90 border border-slate-200/80 text-slate-500 hover:bg-white hover:border-orange-400/60 hover:shadow-md transition-all text-xs sm:text-sm group"
+          className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-slate-100/90 border border-slate-200/80 text-slate-500 hover:bg-white hover:border-orange-400/60 hover:shadow-md transition-all text-xs sm:text-sm group min-w-0"
         >
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-w-0">
             <Search className="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-colors shrink-0" />
             <span className="text-slate-600 font-medium truncate">Search database...</span>
           </div>
@@ -109,7 +109,7 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
         </button>
       </div>
 
-      <div className="flex items-center space-x-2 sm:space-x-4 ml-2">
+      <div className="flex items-center space-x-2 sm:space-x-4 ml-2 shrink-0">
         {/* Refresh Button */}
         <button
           onClick={handleRefresh}
@@ -211,32 +211,34 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
         <div className="h-6 w-px bg-slate-200"></div>
 
         {/* Redesigned Modern Profile Card */}
-        <div className="relative" ref={profileDropdownRef}>
+        <div className="relative shrink-0" ref={profileDropdownRef}>
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             type="button"
-            className="flex items-center space-x-3 p-1.5 pl-2.5 pr-3 bg-gradient-to-b from-white to-slate-50/90 border border-slate-200/90 hover:border-orange-300 rounded-2xl shadow-2xs hover:shadow-xs transition-all group"
+            className="flex items-center p-1.5 bg-gradient-to-b from-white to-slate-50/90 border border-slate-200/90 hover:border-orange-300 rounded-full shadow-2xs hover:shadow-xs transition-all group shrink-0"
           >
-            <div className="relative">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white font-bold flex items-center justify-center text-xs shadow-xs border border-white/20 group-hover:from-orange-600 group-hover:to-orange-500 transition-colors">
+            <div className="relative shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-900 to-slate-800 text-white font-bold flex items-center justify-center text-[13px] shadow-xs border border-white/20 group-hover:from-orange-600 group-hover:to-orange-500 transition-colors">
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
             </div>
 
-            <div className="hidden sm:block text-left">
+            <div className="hidden sm:block text-left min-w-0 ml-3 mr-1">
               <div className="flex items-center space-x-1">
-                <span className="text-xs font-bold text-slate-900 leading-tight group-hover:text-orange-600 transition-colors">
+                <span className="text-xs font-bold text-slate-900 leading-tight group-hover:text-orange-600 transition-colors truncate block max-w-[130px]">
                   {user?.name || 'CorePack Admin'}
                 </span>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400 flex items-center">
-                <ShieldCheck className="w-3 h-3 text-orange-500 mr-0.5 inline" />
-                {user?.role || 'System Administrator'}
+              <span className="text-[10px] font-semibold text-slate-400 flex items-center truncate max-w-[130px]">
+                <ShieldCheck className="w-3 h-3 text-orange-500 mr-0.5 inline shrink-0" />
+                <span className="truncate">{user?.role || 'System Administrator'}</span>
               </span>
             </div>
 
-            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-orange-500' : ''}`} />
+            <div className="hidden sm:flex items-center justify-center w-6 h-6 rounded-full hover:bg-slate-100 ml-1">
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-orange-500' : ''}`} />
+            </div>
           </button>
 
           {/* Profile Dropdown Popover */}

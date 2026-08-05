@@ -73,9 +73,11 @@ export function Select({ className, containerClassName, label, error, children, 
           onClick={() => !disabled && setIsOpen(!isOpen)}
         >
           <span className="truncate">{selectedOption ? selectedOption.label : '-- Select --'}</span>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-            <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isOpen && "transform rotate-180")} />
-          </div>
+          {!disabled && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+              <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isOpen && "transform rotate-180")} />
+            </div>
+          )}
         </div>
 
         <AnimatePresence>

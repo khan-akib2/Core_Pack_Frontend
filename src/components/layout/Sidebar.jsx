@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotificationsSync } from '@/lib/notificationsSync';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -98,7 +99,7 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
                   className={cn(
                     "flex items-center justify-between px-3.5 py-2.5 text-[13.5px] transition-all duration-150 group relative z-10",
                     isActive
-                      ? "bg-[#F4F6FB] text-slate-900 font-semibold rounded-l-xl mr-0 shadow-2xs"
+                      ? "bg-[#F4F6FB] text-slate-900 font-semibold lg:rounded-l-xl lg:rounded-r-none rounded-xl mr-3.5 lg:mr-0 shadow-2xs"
                       : "text-slate-300 hover:text-white hover:bg-white/10 rounded-xl mr-3.5 font-medium"
                   )}
                 >
@@ -122,12 +123,12 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
                 {/* MoveX Inverted Corner Cutouts connecting seamlessly to canvas */}
                 {isActive && (
                   <>
-                    <div className="absolute -top-4 right-0 w-4 h-4 bg-[#F4F6FB] pointer-events-none z-0">
-                      <div className="w-full h-full bg-[#0B132A] rounded-br-2xl"></div>
-                    </div>
-                    <div className="absolute -bottom-4 right-0 w-4 h-4 bg-[#F4F6FB] pointer-events-none z-0">
-                      <div className="w-full h-full bg-[#0B132A] rounded-tr-2xl"></div>
-                    </div>
+                    <svg className="hidden lg:block absolute -top-4 right-0 w-4 h-4 text-[#F4F6FB] pointer-events-none z-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M16 16H0C8.83656 16 16 8.83656 16 0V16Z" fill="currentColor"/>
+                    </svg>
+                    <svg className="hidden lg:block absolute -bottom-4 right-0 w-4 h-4 text-[#F4F6FB] pointer-events-none z-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M16 0H0C8.83656 0 16 7.16344 16 16V0Z" fill="currentColor"/>
+                    </svg>
                   </>
                 )}
               </div>
@@ -162,17 +163,29 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
       </div>
 
       {/* Mobile Drawer Backdrop & Sidebar */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
-            onClick={onCloseMobile}
-          ></div>
-          <div className="relative z-10 h-full max-w-xs animate-in slide-in-from-left duration-200">
-            {sidebarContent}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+              onClick={onCloseMobile}
+            ></motion.div>
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+              className="relative z-10 h-full max-w-xs"
+            >
+              {sidebarContent}
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 }
