@@ -286,33 +286,11 @@ export default function NewInvoicePage() {
                 </div>
               </div>
 
-              {/* Box Size & Pallet Size Details */}
-              <div className="grid grid-cols-12 gap-3 items-center pt-1 border-t border-slate-200/60">
-                <div className="col-span-6 lg:col-span-5">
-                  <input
-                    type="text"
-                    placeholder="Box Size (e.g. 500x400x300 mm)"
-                    value={item.boxSize}
-                    onChange={(e) => updateItemField(idx, 'boxSize', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-
-                <div className="col-span-5 lg:col-span-6">
-                  <input
-                    type="text"
-                    placeholder="Pallet Size (e.g. 1200x1000 mm)"
-                    value={item.palletSize}
-                    onChange={(e) => updateItemField(idx, 'palletSize', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-
-                <div className="col-span-1 flex items-center justify-end">
-                  <button type="button" onClick={() => removeItemRow(idx)} className="text-slate-400 hover:text-rose-500 p-1">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* Item Actions */}
+              <div className="flex items-center justify-end pt-2 border-t border-slate-200/60 mt-1">
+                <button type="button" onClick={() => removeItemRow(idx)} className="text-slate-400 hover:text-rose-500 p-1">
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ))}
