@@ -170,7 +170,7 @@ export default function EditDeliveryChallanPage() {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-12 antialiased">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <Link href={`/delivery-challans/${params.id}`}>
+          <Link href={`/delivery-challans/${id}`}>
             <Button variant="outline" size="sm" className="shrink-0"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <div className="min-w-0">
