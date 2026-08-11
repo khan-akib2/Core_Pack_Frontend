@@ -22,7 +22,7 @@ export default function DashboardPage() {
     queryKey: ['recentInvoices'],
     queryFn: async () => {
       const res = await api.get('/invoices?limit=6');
-      return res.data.data;
+      return res.data;
     }
   });
 
@@ -30,7 +30,7 @@ export default function DashboardPage() {
     queryKey: ['recentChallans'],
     queryFn: async () => {
       const res = await api.get('/challans?limit=6');
-      return res.data.data;
+      return res.data;
     }
   });
 
@@ -74,13 +74,15 @@ export default function DashboardPage() {
         <Card className="p-5 flex flex-col justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Dispatches</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{recentChallans.length || 12} Challans</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">
+              {recentChallansData?.pagination?.totalItems || recentChallans.length || 0} Challans
+            </p>
           </div>
           <div className="mt-3 space-y-1.5">
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-orange-500 h-1.5 rounded-full w-[82%]"></div>
+              <div className="bg-orange-500 h-1.5 rounded-full w-[100%]"></div>
             </div>
-            <p className="text-xs font-medium text-slate-500">82% completed dispatches</p>
+            <p className="text-xs font-medium text-slate-500">Live active data</p>
           </div>
         </Card>
 
@@ -91,7 +93,7 @@ export default function DashboardPage() {
           </div>
           <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-emerald-600">
             <CheckCircle2 className="w-4 h-4" />
-            <span>YoY Growth ↑ 10%</span>
+            <span>Updated in real-time</span>
           </div>
         </Card>
 
