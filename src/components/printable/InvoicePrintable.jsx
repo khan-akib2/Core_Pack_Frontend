@@ -391,7 +391,6 @@ export function InvoicePrintable({ invoice, company }) {
                     <div>
                       {item.name}
                       {item.boxSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.boxSize}</span>}
-                      {item.palletSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.palletSize}</span>}
                     </div>
                     {item.description && <div style={{ fontSize: '9px', color: '#666', fontWeight: '400' }}>{item.description}</div>}
                   </td>

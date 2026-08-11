@@ -314,11 +314,28 @@ export default function EditInvoicePage() {
                 </div>
               </div>
 
-              {/* Item Actions */}
-              <div className="flex items-center justify-end pt-2 border-t border-slate-200/60 mt-1">
-                <button type="button" onClick={() => removeItemRow(idx)} className="text-slate-400 hover:text-rose-500 p-1">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              {/* Row 2: Dimensions & Actions */}
+              <div className="grid grid-cols-12 gap-3 items-end mt-1">
+                <div className="col-span-12 lg:col-span-6">
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1">Size</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 10x10x10 or 100x120"
+                    value={item.boxSize}
+                    onChange={(e) => updateItemField(idx, 'boxSize', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+                <div className="col-span-12 lg:col-span-6 flex justify-end">
+                  <button 
+                    type="button" 
+                    onClick={() => removeItemRow(idx)} 
+                    className="flex items-center justify-center text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 px-3 py-2 rounded-lg text-xs font-medium transition-all h-[36px]"
+                    title="Remove Item"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1.5" /> Remove
+                  </button>
+                </div>
               </div>
             </div>
           ))}
