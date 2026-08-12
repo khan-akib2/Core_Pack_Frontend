@@ -1,9 +1,13 @@
 import React from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
-export function ReportPrintable({ salesReport, gstr1Report, company }) {
+export function ReportPrintable({ salesReport, gstr1Report, company, selectedDate }) {
   const summary = salesReport?.summary || {};
   const invoices = salesReport?.invoices || [];
+
+  const periodText = selectedDate 
+    ? new Date(selectedDate.year, selectedDate.month).toLocaleString('en-IN', { month: 'long', year: 'numeric' })
+    : new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' });
 
   return (
     <div className="printable-document hidden print:block bg-white text-slate-900 p-8 max-w-5xl mx-auto text-xs font-sans">
@@ -16,7 +20,7 @@ export function ReportPrintable({ salesReport, gstr1Report, company }) {
         </div>
         <div className="text-right space-y-1">
           <h2 className="text-sm font-bold text-orange-600 uppercase tracking-widest">GST & Sales Tax Report</h2>
-          <p className="text-xs text-slate-600 font-semibold">Period: {new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' })}</p>
+          <p className="text-xs text-slate-600 font-semibold">Period: {periodText}</p>
           <p className="text-[10px] text-slate-400">Generated on: {formatDate(new Date())}</p>
         </div>
       </div>

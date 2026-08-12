@@ -29,10 +29,11 @@ export function clearAllNotifications() {
 }
 
 export function useNotificationsSync() {
-  const [times, setTimes] = useState(() => getStoredNotificationTimes());
+  const [times, setTimes] = useState({ readUntil: 0, clearedAt: 0 });
 
   useEffect(() => {
     const sync = () => setTimes(getStoredNotificationTimes());
+    sync();
     window.addEventListener('notifications_state_changed', sync);
     window.addEventListener('storage', sync);
     return () => {
