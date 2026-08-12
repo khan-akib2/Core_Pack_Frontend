@@ -148,6 +148,7 @@ export default function EditDeliveryChallanPage() {
       return {
         productId: item.productId || undefined,
         name: itemName || 'Packaging Product',
+        boxSize: item.boxSize || '',
         hsnCode: item.hsnCode || '44151000',
         qty: Number(item.qty) || 1,
         unit: item.unit || 'Pcs',
@@ -229,12 +230,12 @@ export default function EditDeliveryChallanPage() {
                 </div>
 
                 <div className="col-span-12 lg:col-span-4">
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1">Item Particular / Dimensions</label>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1">Size</label>
                   <input
                     type="text"
-                    placeholder="e.g. Wooden Box 10x10"
-                    value={item.name}
-                    onChange={(e) => updateItemField(idx, 'name', e.target.value)}
+                    placeholder="e.g. 10*10*10"
+                    value={item.boxSize || ''}
+                    onChange={(e) => updateItemField(idx, 'boxSize', e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
                   />
                 </div>
