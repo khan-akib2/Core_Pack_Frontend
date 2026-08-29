@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { EmailDocumentModal } from '@/components/ui/EmailDocumentModal';
+import { WhatsAppDocumentModal } from '@/components/ui/WhatsAppDocumentModal';
 import { InvoicePrintable } from '@/components/printable/InvoicePrintable';
-import { Printer, ArrowLeft, CreditCard, Pencil } from 'lucide-react';
+import { Printer, ArrowLeft, CreditCard, Pencil, Mail, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
@@ -22,6 +24,8 @@ export default function InvoiceDetailPage() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentMode, setPaymentMode] = useState('Bank Transfer');
   const [refNo, setRefNo] = useState('');
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
 
   const { data: invoice, isLoading } = useQuery({
     queryKey: ['invoice', id],
@@ -84,12 +88,18 @@ export default function InvoiceDetailPage() {
           </Link>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">Tax Invoice {invoice.invoiceNumber}</h1>
         </div>
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Link href={`/invoices/edit/${id}`}>
             <Button variant="outline" className="w-full sm:w-auto whitespace-nowrap">
               <Pencil className="w-4 h-4 mr-2" /> Edit Invoice
             </Button>
           </Link>
+          <Button variant="outline" onClick={() => setIsWhatsAppModalOpen(true)} className="w-full sm:w-auto whitespace-nowrap text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200">
+            <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+          </Button>
+          <Button variant="outline" onClick={() => setIsEmailModalOpen(true)} className="w-full sm:w-auto whitespace-nowrap text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border-indigo-200">
+            <Mail className="w-4 h-4 mr-2" /> Email
+          </Button>
           <Button onClick={handlePrint} className="w-full sm:w-auto whitespace-nowrap">
             <Printer className="w-4 h-4 mr-2" /> Print A4 Invoice
           </Button>
@@ -149,6 +159,30 @@ export default function InvoiceDetailPage() {
       <div className="hidden print:block">
         <InvoicePrintable invoice={invoice} company={company} />
       </div>
+
+      <EmailDocumentModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        documentType="Invoice"
+        documentId={id}
+        documentNumber={invoice.invoiceNumber}
+        defaultEmail={invoice.customerSnapshot?.email || ''}
+        defaultCustomerId={invoice.customerId || ''}
+        customerName={invoice.customerSnapshot?.companyName || invoice.customerSnapshot?.name || ''}
+        apiEndpoint={`/invoices/${id}/send-email/invoice`}
+      />
+
+      <WhatsAppDocumentModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        documentType="Invoice"
+        documentId={id}
+        documentNumber={invoice.invoiceNumber}
+        defaultPhone={invoice.customerSnapshot?.phone || ''}
+        defaultCustomerId={invoice.customerId || ''}
+        customerName={invoice.customerSnapshot?.companyName || invoice.customerSnapshot?.name || ''}
+        apiEndpoint={`/invoices/${id}/send-whatsapp/invoice`}
+      />
     </div>
   );
 }

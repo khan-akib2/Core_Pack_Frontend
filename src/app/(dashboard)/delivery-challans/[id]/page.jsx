@@ -6,11 +6,15 @@ import { api } from '@/lib/api';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { ChallanPrintable } from '@/components/printable/ChallanPrintable';
-import { Printer, ArrowLeft, Pencil } from 'lucide-react';
+import { EmailDocumentModal } from '@/components/ui/EmailDocumentModal';
+import { WhatsAppDocumentModal } from '@/components/ui/WhatsAppDocumentModal';
+import { Printer, ArrowLeft, Pencil, Mail, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ChallanDetailPage() {
   const { id } = useParams();
+  const [isEmailModalOpen, setIsEmailModalOpen] = React.useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = React.useState(false);
 
   const { data: challan, isLoading } = useQuery({
     queryKey: ['challan', id],
@@ -44,12 +48,18 @@ export default function ChallanDetailPage() {
           </Link>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">Delivery Challan {challan.challanNumber}</h1>
         </div>
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Link href={`/delivery-challans/edit/${id}`}>
             <Button variant="outline" className="w-full sm:w-auto whitespace-nowrap">
               <Pencil className="w-4 h-4 mr-2" /> Edit Challan
             </Button>
           </Link>
+          <Button variant="outline" onClick={() => setIsWhatsAppModalOpen(true)} className="w-full sm:w-auto whitespace-nowrap text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200">
+            <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+          </Button>
+          <Button variant="outline" onClick={() => setIsEmailModalOpen(true)} className="w-full sm:w-auto whitespace-nowrap text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border-indigo-200">
+            <Mail className="w-4 h-4 mr-2" /> Email
+          </Button>
           <Button onClick={handlePrint} className="w-full sm:w-auto whitespace-nowrap">
             <Printer className="w-4 h-4 mr-2" /> Print Challan
           </Button>
@@ -74,6 +84,30 @@ export default function ChallanDetailPage() {
       <div className="hidden print:block">
         <ChallanPrintable challan={challan} company={company} />
       </div>
+
+      <EmailDocumentModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        documentType="Delivery Challan"
+        documentId={id}
+        documentNumber={challan.challanNumber}
+        defaultEmail={challan.customerSnapshot?.email || ''}
+        defaultCustomerId={challan.customerId || ''}
+        customerName={challan.customerSnapshot?.companyName || challan.customerSnapshot?.name || ''}
+        apiEndpoint={`/challans/${id}/send-email/challan`}
+      />
+
+      <WhatsAppDocumentModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        documentType="Delivery Challan"
+        documentId={id}
+        documentNumber={challan.challanNumber}
+        defaultPhone={challan.customerSnapshot?.phone || ''}
+        defaultCustomerId={challan.customerId || ''}
+        customerName={challan.customerSnapshot?.companyName || challan.customerSnapshot?.name || ''}
+        apiEndpoint={`/challans/${id}/send-whatsapp/challan`}
+      />
     </div>
   );
 }

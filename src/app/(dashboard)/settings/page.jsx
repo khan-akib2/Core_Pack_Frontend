@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Save, CheckCircle2 } from 'lucide-react';
 import { useCustomModal } from '@/components/providers/ModalProvider';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const { showAlert } = useCustomModal();
@@ -23,6 +24,7 @@ export default function SettingsPage() {
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [stateCode, setStateCode] = useState('');
   const [pincode, setPincode] = useState('');
 
   const [bankName, setBankName] = useState('');
@@ -52,6 +54,7 @@ export default function SettingsPage() {
       setStreet(company.address?.street || '');
       setCity(company.address?.city || '');
       setState(company.address?.state || '');
+      setStateCode(company.address?.stateCode || '');
       setPincode(company.address?.pincode || '');
 
       setBankName(company.bankDetails?.bankName || '');
@@ -91,7 +94,7 @@ export default function SettingsPage() {
       gstin,
       email,
       phone,
-      address: { street, city, state, pincode, stateCode: '27', country: 'India' },
+      address: { street, city, state, pincode, stateCode, country: 'India' },
       bankDetails: { bankName, accountNumber, accountNo: accountNumber, ifscCode, ifsc: ifscCode, branch },
       certificationText,
       challanBannerText
@@ -107,10 +110,17 @@ export default function SettingsPage() {
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Company & Print Settings</h1>
           <p className="text-xs text-slate-500 mt-0.5">Configure Core Pack India identity, GST credentials, Bank A/C & customizable print messages</p>
         </div>
-        <Button type="submit" disabled={updateSettingsMutation.isPending} className="flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap">
-          <Save className="w-4 h-4 shrink-0" />
-          <span className="truncate">{updateSettingsMutation.isPending ? 'Saving...' : 'Save Configuration'}</span>
-        </Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Link href="/settings/whatsapp" className="w-full sm:w-auto">
+            <Button type="button" variant="outline" className="flex items-center justify-center gap-2 w-full whitespace-nowrap text-green-600 border-green-200 hover:bg-green-50">
+              WhatsApp Integration
+            </Button>
+          </Link>
+          <Button type="submit" disabled={updateSettingsMutation.isPending} className="flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap">
+            <Save className="w-4 h-4 shrink-0" />
+            <span className="truncate">{updateSettingsMutation.isPending ? 'Saving...' : 'Save Configuration'}</span>
+          </Button>
+        </div>
       </div>
 
       {successMsg && (
@@ -168,6 +178,7 @@ export default function SettingsPage() {
           <Input label="Street / Plot / MIDC Area" value={street} onChange={(e) => setStreet(e.target.value)} className="md:col-span-2" />
           <Input label="City" value={city} onChange={(e) => setCity(e.target.value)} />
           <Input label="State" value={state} onChange={(e) => setState(e.target.value)} />
+          <Input label="GST State Code" value={stateCode} onChange={(e) => setStateCode(e.target.value)} placeholder="e.g. 27 for Maharashtra" />
           <Input label="Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} />
         </div>
       </Card>

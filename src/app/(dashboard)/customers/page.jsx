@@ -18,7 +18,12 @@ export default function CustomersPage() {
 
   const [companyName, setCompanyName] = useState('');
   const [gstin, setGstin] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [street, setStreet] = useState('');
+  const [state, setState] = useState('');
+  const [stateCode, setStateCode] = useState('');
+  const [pincode, setPincode] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -63,14 +68,24 @@ export default function CustomersPage() {
     setEditingId(null);
     setCompanyName('');
     setGstin('');
+    setPhone('');
+    setEmail('');
     setStreet('');
+    setState('');
+    setStateCode('');
+    setPincode('');
   };
 
   const handleEdit = (cust) => {
     setEditingId(cust._id);
     setCompanyName(cust.companyName || cust.name || '');
     setGstin(cust.gstin || '');
+    setPhone(cust.phone || '');
+    setEmail(cust.email || '');
     setStreet(cust.billingAddress?.street || '');
+    setState(cust.billingAddress?.state || '');
+    setStateCode(cust.billingAddress?.stateCode || '');
+    setPincode(cust.billingAddress?.pincode || '');
     setShowModal(true);
   };
 
@@ -92,11 +107,13 @@ export default function CustomersPage() {
       name: companyName,
       companyName,
       gstin,
+      phone,
+      email,
       billingAddress: {
         street,
-        state: 'Maharashtra',
-        stateCode: '27',
-        pincode: '411001'
+        state,
+        stateCode,
+        pincode
       }
     });
   };
@@ -117,7 +134,7 @@ export default function CustomersPage() {
         <div className="flex items-center space-x-2">
           <Search className="w-4.5 h-4.5 text-slate-400" />
           <Input
-            placeholder="Search by Company Name, GSTIN, Address..."
+            placeholder="Search by Company Name, GSTIN, Address, Email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent border-none shadow-none focus:ring-0 text-xs placeholder:text-slate-400 py-1.5 px-1"
@@ -132,6 +149,7 @@ export default function CustomersPage() {
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 <th className="p-3.5 pl-4">Company Name</th>
                 <th className="p-3.5">GSTIN</th>
+                <th className="p-3.5">Phone / Email</th>
                 <th className="p-3.5">Billing Address</th>
                 <th className="p-3.5 pr-4 text-right">Actions</th>
               </tr>
@@ -139,17 +157,21 @@ export default function CustomersPage() {
             <tbody className="divide-y divide-slate-100 text-xs font-normal">
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} className="p-6 text-center text-slate-400 font-medium">Loading customers...</td>
+                  <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">Loading customers...</td>
                 </tr>
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-6 text-center text-slate-400 font-medium">No customers registered.</td>
+                  <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">No customers registered.</td>
                 </tr>
               ) : (
                 customers.map((c) => (
                   <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="p-3.5 pl-4 font-semibold text-slate-900">{c.companyName || c.name}</td>
                     <td className="p-3.5 font-mono font-semibold text-orange-600">{c.gstin || 'Unregistered'}</td>
+                    <td className="p-3.5 text-xs text-slate-700">
+                      <div>{c.phone || 'N/A'}</div>
+                      {c.email && <div className="text-[11px] text-slate-400">{c.email}</div>}
+                    </td>
                     <td className="p-3.5 text-xs text-slate-700">{c.billingAddress?.street || 'N/A'}</td>
                     <td className="p-3.5 pr-4 text-right">
                       <div className="flex items-center justify-end space-x-1.5">
@@ -188,8 +210,17 @@ export default function CustomersPage() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               <Input label="Company Name *" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
-              <Input label="GSTIN (15 Digits)" value={gstin} onChange={(e) => setGstin(e.target.value)} placeholder="27AABCC1234D1Z5" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Input label="GSTIN (15 Digits)" value={gstin} onChange={(e) => setGstin(e.target.value)} placeholder="27AABCC1234D1Z5" />
+                <Input label="Phone (WhatsApp)" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +919876543210" />
+              </div>
+              <Input label="Email (Optional)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. client@company.com" />
               <Input label="Billing Address" value={street} onChange={(e) => setStreet(e.target.value)} placeholder="e.g. Plot No 12, MIDC Area" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Input label="State" value={state} onChange={(e) => setState(e.target.value)} placeholder="Maharashtra" />
+                <Input label="State Code" value={stateCode} onChange={(e) => setStateCode(e.target.value)} placeholder="27" />
+                <Input label="Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="411001" />
+              </div>
               <div className="flex justify-end space-x-3 pt-3">
                 <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
                 <Button type="submit" disabled={createOrUpdateCustomerMutation.isPending}>
