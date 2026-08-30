@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CorePack</string>
+    <string name="title_activity_main">CorePack</string>
+    <string name="package_name">com.corepackindia.app</string>
+    <string name="custom_url_scheme">com.corepackindia.app</string>
+</resources>

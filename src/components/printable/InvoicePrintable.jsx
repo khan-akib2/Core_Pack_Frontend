@@ -497,14 +497,19 @@ export function InvoicePrintable({ invoice, company }) {
             {/* Signature Section */}
             <div style={{ display: 'flex', flex: 1, minHeight: '130px' }}>
               <div style={{ flex: 1, position: 'relative', padding: '4px 10px 0' }}>
-                <div style={{ fontSize: '8.5px', color: '#333', fontWeight: '500', lineHeight: '1.2', textAlign: 'center', marginBottom: '2px' }}>
+                <div style={{ fontSize: '8.5px', color: '#333', fontWeight: '500', lineHeight: '1.2', textAlign: 'center', marginBottom: '4px' }}>
                   Certified that the particulars given are true and correct.
                 </div>
                 <div style={{ fontWeight: '800', color: O, fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.2px', textAlign: 'center' }}>
                   For CORE PACK INDIA
                 </div>
-                <div style={{ position: 'absolute', bottom: '14px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ width: '220px', borderTop: '1px solid #888', marginBottom: '5px' }} />
+                <div style={{ position: 'absolute', bottom: '4px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <img 
+                    src="/signature.png" 
+                    alt="Authorized Signature" 
+                    style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
+                  />
+                  <div style={{ width: '240px', borderTop: '1px solid #888', marginBottom: '4px' }} />
                   <div style={{ fontSize: '9.5px', fontWeight: '700', color: '#111' }}>Authorised Signatory</div>
                 </div>
               </div>

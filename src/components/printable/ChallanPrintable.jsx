@@ -277,8 +277,15 @@ export function ChallanPrintable({ challan, company }) {
             <div style={{ fontSize: '12.5px', fontWeight: '800', color: O }}>
               For {company?.companyName || 'CORE PACK INDIA'}
             </div>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: N }}>
-              Proprietor / Authorised Signatory
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '240px' }}>
+              <img 
+                src="/signature.png" 
+                alt="Authorized Signature" 
+                style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
+              />
+              <div style={{ width: '100%', borderTop: '1px solid #111', paddingTop: '4px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: N }}>
+                Proprietor / Authorised Signatory
+              </div>
             </div>
           </div>
         </div>

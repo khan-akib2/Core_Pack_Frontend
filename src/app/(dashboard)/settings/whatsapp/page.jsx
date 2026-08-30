@@ -28,6 +28,23 @@ export default function WhatsAppSettingsPage() {
     }
   });
 
+  const { data: company } = useQuery({
+    queryKey: ['companySettings'],
+    queryFn: async () => {
+      const res = await api.get('/company');
+      return res.data.data;
+    }
+  });
+
+  const formatWhatsAppNumber = (num) => {
+    if (!num) return 'Unknown';
+    const cleaned = num.replace(/\D/g, '');
+    if (cleaned.length === 12 && cleaned.startsWith('91')) {
+      return `+91 ${cleaned.slice(2, 7)} ${cleaned.slice(7)}`;
+    }
+    return `+${cleaned}`;
+  };
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await api.post('/whatsapp/logout');
@@ -100,8 +117,15 @@ export default function WhatsAppSettingsPage() {
                   Your CorePack application is successfully linked. You can now send Invoices, Quotations, and Challans directly to your customers' WhatsApp numbers.
                 </p>
                 {whatsapp.info && (
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 font-medium">
-                    Connected as: {whatsapp.info.pushname || 'Unknown'} ({whatsapp.info.wid?.user})
+                  <div className="w-full max-w-sm mt-4 text-left border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
+                    <div className="bg-slate-50 px-4 py-3">
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Connected Number</p>
+                      <p className="text-base font-semibold text-slate-900 font-mono tracking-tight">{formatWhatsAppNumber(whatsapp.info.wid?.user)}</p>
+                    </div>
+                    <div className="bg-white px-4 py-3">
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Account / Business</p>
+                      <p className="text-sm font-medium text-slate-800">{company?.companyName || whatsapp.info.pushname || 'CorePack India'}</p>
+                    </div>
                   </div>
                 )}
                 <Button onClick={handleLogout} disabled={logoutMutation.isPending} variant="outline" className="mt-4 text-rose-600 border-rose-200 hover:bg-rose-50">

@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { useNotificationsSync, markAllNotificationsRead, clearAllNotifications } from '@/lib/notificationsSync';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Header({ onOpenSearch, onMenuToggle }) {
   const { user, logout } = useAuthStore();
@@ -55,7 +56,15 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const storedRefreshToken = typeof window !== 'undefined' ? localStorage.getItem('cp_refresh_token') : null;
+      await api.post('/auth/logout', {}, {
+        headers: storedRefreshToken ? { 'x-refresh-token': storedRefreshToken } : {}
+      });
+    } catch (error) {
+      console.error('Logout API failed:', error);
+    }
     logout();
     router.push('/login');
   };
@@ -138,8 +147,15 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
           </button>
 
           {/* Notifications Dropdown */}
+          <AnimatePresence>
           {isNotificationOpen && (
-            <div className="absolute right-[-60px] sm:right-0 mt-3 w-[340px] sm:w-96 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute right-[-60px] sm:right-0 mt-3 w-[340px] sm:w-96 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden"
+            >
               <div className="p-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                 <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <h3 className="text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Notifications</h3>
@@ -204,8 +220,9 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
                   })
                 )}
               </div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
 
         <div className="h-6 w-px bg-slate-200"></div>
@@ -242,8 +259,15 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
           </button>
 
           {/* Profile Dropdown Popover */}
+          <AnimatePresence>
           {isProfileOpen && (
-            <div className="absolute right-0 mt-3 w-56 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 p-1.5">
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute right-0 mt-3 w-56 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden p-1.5"
+            >
               <div className="p-3 border-b border-slate-100 bg-slate-50/60 rounded-xl mb-1">
                 <p className="text-xs font-bold text-slate-900">{user?.name || 'CorePack Admin'}</p>
                 <p className="text-[10.5px] text-slate-500 truncate mt-0.5">{user?.email || 'admin@corepackindia.com'}</p>
@@ -280,8 +304,9 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
                 <LogOut className="w-4 h-4" />
                 <span>Log Out Account</span>
               </button>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
       </div>
     </header>

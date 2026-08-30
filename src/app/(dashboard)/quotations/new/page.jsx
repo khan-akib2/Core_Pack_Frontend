@@ -199,15 +199,24 @@ export default function NewQuotationPage() {
       <Card className="p-6 border-slate-200/80 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <h2 className="text-sm font-bold text-orange-600">Quotation Line Items</h2>
-          <Button type="button" variant="outline" size="sm" onClick={addItemRow}>
+          <Button type="button" variant="outline" size="sm" onClick={addItemRow} className="whitespace-nowrap">
             <Plus className="w-4 h-4 mr-1" /> Add Line Item
           </Button>
         </div>
 
         <div className="space-y-3">
           {items.map((item, idx) => (
-            <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-slate-50/80 p-3 rounded-xl border border-slate-200">
-              <div className="col-span-3">
+            <div key={idx} className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-2 items-start md:items-center bg-slate-50/80 p-4 md:p-3 rounded-xl border border-slate-200 relative">
+              {/* Mobile Remove Button - Top Right */}
+              <button 
+                type="button" 
+                onClick={() => removeItemRow(idx)} 
+                className="md:hidden absolute top-2 right-2 text-slate-400 hover:text-rose-500 p-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+              
+              <div className="w-full md:col-span-3">
                 <Select
                   label="Product"
                   value={item.productId}
@@ -220,7 +229,8 @@ export default function NewQuotationPage() {
                 </Select>
               </div>
 
-              <div className="col-span-2">
+              <div className="w-full md:col-span-2">
+                <label className="md:hidden text-[10px] font-bold text-slate-500 uppercase mb-1 block">HSN Code</label>
                 <input
                   type="text"
                   placeholder="HSN Code"
@@ -230,37 +240,43 @@ export default function NewQuotationPage() {
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="w-full flex md:contents gap-2">
+                <div className="w-1/2 md:w-full md:col-span-2">
+                  <label className="md:hidden text-[10px] font-bold text-slate-500 uppercase mb-1 block">Quantity</label>
+                  <input
+                    type="text"
+                    placeholder="Qty"
+                    value={item.qty}
+                    onChange={(e) => updateItemField(idx, 'qty', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-semibold"
+                  />
+                </div>
+
+                <div className="w-1/2 md:w-full md:col-span-2">
+                  <label className="md:hidden text-[10px] font-bold text-slate-500 uppercase mb-1 block">Unit Rate ₹</label>
+                  <input
+                    type="number"
+                    placeholder="Rate ₹"
+                    value={item.rate}
+                    onChange={(e) => updateItemField(idx, 'rate', e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-semibold"
+                  />
+                </div>
+              </div>
+
+
+
+              <div className="w-full md:col-span-2">
+                <label className="md:hidden text-[10px] font-bold text-slate-500 uppercase mb-1 block">GST Rate</label>
                 <input
                   type="text"
-                  placeholder="Qty"
-                  value={item.qty}
-                  onChange={(e) => updateItemField(idx, 'qty', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-semibold"
+                  value="5% (2.5% CGST + 2.5% SGST)"
+                  disabled
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-[11px] text-slate-500 font-semibold cursor-not-allowed truncate"
                 />
               </div>
 
-              <div className="col-span-2">
-                <input
-                  type="number"
-                  placeholder="Unit Rate ₹"
-                  value={item.rate}
-                  onChange={(e) => updateItemField(idx, 'rate', e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-semibold"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <Select
-                  label="GST Rate"
-                  value={item.taxRate}
-                  onChange={(e) => updateItemField(idx, 'taxRate', Number(e.target.value))}
-                >
-                  <option value={5}>5% GST (2.5% + 2.5%)</option>
-                </Select>
-              </div>
-
-              <div className="col-span-1 flex items-center justify-end">
+              <div className="hidden md:flex col-span-1 items-center justify-end">
                 <button type="button" onClick={() => removeItemRow(idx)} className="text-slate-400 hover:text-rose-500 p-1">
                   <Trash2 className="w-4 h-4" />
                 </button>

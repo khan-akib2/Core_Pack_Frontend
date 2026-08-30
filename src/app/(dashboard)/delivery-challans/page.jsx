@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { formatDate } from '@/lib/utils';
 import { Search, Plus, Eye, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { DocumentPreviewModal } from '@/components/ui/DocumentPreviewModal';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
@@ -17,6 +18,7 @@ export default function DeliveryChallansPage() {
   const { confirm } = useCustomModal();
   const [search, setSearch] = useState('');
   const queryClient = useQueryClient();
+  const [previewModal, setPreviewModal] = useState({ isOpen: false, type: null, id: null });
 
   const { data: challansData, isLoading } = useQuery({
     queryKey: ['challans', search],
@@ -110,11 +112,9 @@ export default function DeliveryChallansPage() {
                     <td className="p-3.5 text-xs text-slate-500">{formatDate(dc.challanDate)}</td>
                     <td className="p-3.5 pr-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <Link href={`/delivery-challans/${dc._id}`}>
-                          <Button variant="outline" size="sm" className="text-xs">
-                            <Eye className="w-3.5 h-3.5 mr-1" /> View
-                          </Button>
-                        </Link>
+                        <Button variant="outline" size="sm" className="text-xs" onClick={() => setPreviewModal({ isOpen: true, type: 'challan', id: dc._id })}>
+                          <Eye className="w-3.5 h-3.5 mr-1" /> View
+                        </Button>
                         <button
                           onClick={() => handleDelete(dc._id, dc.challanNumber)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
@@ -131,6 +131,13 @@ export default function DeliveryChallansPage() {
           </table>
         </div>
       </Card>
+
+      <DocumentPreviewModal 
+        isOpen={previewModal.isOpen} 
+        onClose={() => setPreviewModal({ isOpen: false, type: null, id: null })} 
+        type={previewModal.type} 
+        documentId={previewModal.id} 
+      />
     </div>
   );
 }

@@ -39,8 +39,8 @@ export default function LoginPage() {
 
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { user, accessToken } = response.data.data;
-      setAuth(user, accessToken);
+      const { user, accessToken, refreshToken } = response.data.data;
+      setAuth(user, accessToken, refreshToken);
       router.push('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check credentials.');

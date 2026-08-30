@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import GlobalSearchModal from '@/components/layout/GlobalSearchModal';
 import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
 import { useAuthStore } from '@/store/authStore';
+import { api } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,13 +14,31 @@ export default function DashboardLayout({ children }) {
   const [mounted, setMounted] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isInitializing, setInitialized } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Hydration Effect: attempts silent refresh if we suspect the user is logged in but tokens are missing from memory
+  useEffect(() => {
+    const hydrate = async () => {
+      if (!isInitializing) return;
+      try {
+        // This triggers the api.js 401 interceptor, which silently hits /auth/refresh and injects the token
+        const res = await api.get('/auth/me');
+        useAuthStore.setState({ user: res.data.data }); // update local user profile
+      } catch (error) {
+        // Refresh failed (e.g. revoked or expired 30d session)
+        // api.js interceptor will have already cleared the state and kicked to /login
+      } finally {
+        setInitialized(false);
+      }
+    };
+    hydrate();
+  }, [isInitializing, setInitialized]);
 
   // Global Ctrl+K / Cmd+K search shortcut listener
   useEffect(() => {
@@ -34,12 +53,12 @@ export default function DashboardLayout({ children }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    if (mounted && !isInitializing && !isAuthenticated) {
       router.push('/login');
     }
-  }, [mounted, isAuthenticated, router]);
+  }, [mounted, isInitializing, isAuthenticated, router]);
 
-  if (!mounted) {
+  if (!mounted || isInitializing) {
     return (
       <div className="min-h-screen bg-[#0B132A] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>

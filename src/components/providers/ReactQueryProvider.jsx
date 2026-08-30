@@ -7,10 +7,10 @@ export default function ReactQueryProvider({ children }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 0, // Always consider data stale to fetch latest updates
+        staleTime: 5 * 60 * 1000, // 5 minutes default freshness
         refetchOnMount: true,
         refetchOnWindowFocus: true,
-        refetchInterval: 3000, // Live poll every 3 seconds so data is updated in real-time without page refresh!
+        refetchInterval: false, // Disabled global polling for performance
       },
     },
   }));

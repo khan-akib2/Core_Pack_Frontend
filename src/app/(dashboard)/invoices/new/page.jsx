@@ -220,7 +220,7 @@ export default function NewInvoicePage() {
       <Card className="p-6 border-slate-200/80 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <h2 className="text-sm font-bold text-orange-600">Invoice Items & Dimensions</h2>
-          <Button type="button" variant="outline" size="sm" onClick={addItemRow}>
+          <Button type="button" variant="outline" size="sm" onClick={addItemRow} className="whitespace-nowrap">
             <Plus className="w-4 h-4 mr-1" /> Add Line Item
           </Button>
         </div>
@@ -276,13 +276,13 @@ export default function NewInvoicePage() {
                 </div>
 
                 <div className="col-span-6 lg:col-span-2">
-                  <Select
-                    label="GST Rate"
-                    value={item.taxRate}
-                    onChange={(e) => updateItemField(idx, 'taxRate', Number(e.target.value))}
-                  >
-                    <option value={5}>5% GST (2.5% + 2.5%)</option>
-                  </Select>
+                  <label className="block text-[11px] font-medium text-slate-500 mb-1">GST Rate</label>
+                  <input
+                    type="text"
+                    value="5% (2.5% CGST + 2.5% SGST)"
+                    disabled
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[11px] text-slate-500 cursor-not-allowed font-semibold truncate"
+                  />
                 </div>
               </div>
 

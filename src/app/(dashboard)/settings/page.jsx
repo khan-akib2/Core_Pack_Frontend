@@ -105,12 +105,12 @@ export default function SettingsPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto pb-12 antialiased">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 mb-2">
+        <div className="mb-2 sm:mb-0">
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Company & Print Settings</h1>
           <p className="text-xs text-slate-500 mt-0.5">Configure Core Pack India identity, GST credentials, Bank A/C & customizable print messages</p>
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto pt-2 sm:pt-0">
           <Link href="/settings/whatsapp" className="w-full sm:w-auto">
             <Button type="button" variant="outline" className="flex items-center justify-center gap-2 w-full whitespace-nowrap text-green-600 border-green-200 hover:bg-green-50">
               WhatsApp Integration

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Plus, Search, Eye, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { DocumentPreviewModal } from '@/components/ui/DocumentPreviewModal';
 
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
@@ -17,6 +18,7 @@ export default function InvoicesPage() {
   const { confirm } = useCustomModal();
   const [search, setSearch] = useState('');
   const queryClient = useQueryClient();
+  const [previewModal, setPreviewModal] = useState({ isOpen: false, type: null, id: null });
 
   const { data: invoicesData, isLoading } = useQuery({
     queryKey: ['invoices', search],
@@ -117,11 +119,9 @@ export default function InvoicesPage() {
                     </td>
                     <td className="p-3.5 pr-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <Link href={`/invoices/${inv._id}`}>
-                          <Button variant="outline" size="sm" className="text-xs">
-                            <Eye className="w-3.5 h-3.5 mr-1" /> View
-                          </Button>
-                        </Link>
+                        <Button variant="outline" size="sm" className="text-xs" onClick={() => setPreviewModal({ isOpen: true, type: 'invoice', id: inv._id })}>
+                          <Eye className="w-3.5 h-3.5 mr-1" /> View
+                        </Button>
                         <button
                           onClick={() => handleDelete(inv._id, inv.invoiceNumber)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
@@ -138,6 +138,13 @@ export default function InvoicesPage() {
           </table>
         </div>
       </Card>
+
+      <DocumentPreviewModal 
+        isOpen={previewModal.isOpen} 
+        onClose={() => setPreviewModal({ isOpen: false, type: null, id: null })} 
+        type={previewModal.type} 
+        documentId={previewModal.id} 
+      />
     </div>
   );
 }

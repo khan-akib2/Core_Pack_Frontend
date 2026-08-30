@@ -282,13 +282,17 @@ export default function ProductsPage() {
                 ))}
               </Select>
               <Input label="HSN Code *" value={hsnCode} onChange={(e) => setHsnCode(e.target.value)} required />
-              <Select
-                label="GST Tax Rate *"
-                value={gstRate}
-                onChange={(e) => setGstRate(e.target.value)}
-              >
-                <option value="5">5% (CGST 2.5% + SGST 2.5%)</option>
-              </Select>
+              
+              <div className="w-full space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">GST Tax Rate *</label>
+                <input 
+                  type="text" 
+                  value="5% (CGST 2.5% + SGST 2.5%)" 
+                  disabled 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-500 cursor-not-allowed shadow-sm font-medium"
+                />
+              </div>
+
               <div className="flex justify-end space-x-3 pt-3">
                 <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
                 <Button type="submit" disabled={createOrUpdateProductMutation.isPending}>

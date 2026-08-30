@@ -362,8 +362,15 @@ export function QuotationPrintable({ quotation, company }) {
               <div style={{ fontWeight: '800', color: O, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2px', textAlign: 'right' }}>
                 For {company?.companyName || 'CORE PACK INDIA'}
               </div>
-              <div style={{ borderTop: '1px solid #111', paddingTop: '4px', textAlign: 'right', fontSize: '10.5px', fontWeight: '700', color: N }}>
-                Authorised Signatory
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '230px' }}>
+                <img 
+                  src="/signature.png" 
+                  alt="Authorized Signature" 
+                  style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
+                />
+                <div style={{ width: '100%', borderTop: '1px solid #111', paddingTop: '4px', textAlign: 'center', fontSize: '10.5px', fontWeight: '700', color: N }}>
+                  Authorised Signatory
+                </div>
               </div>
             </div>
             
