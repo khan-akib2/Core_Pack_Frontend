@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "470762693318",
+    "project_id": "corepack-fe12c",
+    "storage_bucket": "corepack-fe12c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:470762693318:android:c3824d69c4bf00e0d7adc7",
+        "android_client_info": {
+          "package_name": "com.corepackindia.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKbrVF67M_NR1cbvd4a_uzlvD2lC06znk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

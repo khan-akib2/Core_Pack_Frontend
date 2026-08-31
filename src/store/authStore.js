@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { Capacitor } from '@capacitor/core';
+import { SecureStorage } from '@aparajita/capacitor-secure-storage';
+
 
 export const useAuthStore = create((set) => ({
   user: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('cp_user') || 'null') : null,
@@ -10,7 +13,14 @@ export const useAuthStore = create((set) => ({
     if (typeof window !== 'undefined') {
       if (user) localStorage.setItem('cp_user', JSON.stringify(user));
       if (token) localStorage.setItem('cp_access_token', token);
-      if (refreshToken) localStorage.setItem('cp_refresh_token', refreshToken);
+      if (refreshToken) {
+        if (Capacitor.isNativePlatform()) {
+          // Fire and forget, or handle async properly if needed
+          SecureStorage.set({ key: 'cp_refresh_token', value: refreshToken }).catch(console.error);
+        } else {
+          localStorage.setItem('cp_refresh_token', refreshToken);
+        }
+      }
     }
     set({ user, token, isAuthenticated: !!token, isInitializing: false });
   },
@@ -30,7 +40,12 @@ export const useAuthStore = create((set) => ({
     if (typeof window !== 'undefined') {
       localStorage.removeItem('cp_user');
       localStorage.removeItem('cp_access_token');
-      localStorage.removeItem('cp_refresh_token');
+      if (Capacitor.isNativePlatform()) {
+        SecureStorage.remove({ key: 'cp_refresh_token' }).catch(console.error);
+        localStorage.removeItem('cp_biometric_enabled');
+      } else {
+        localStorage.removeItem('cp_refresh_token');
+      }
     }
     set({ user: null, token: null, isAuthenticated: false, isInitializing: false });
   }

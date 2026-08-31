@@ -6,6 +6,9 @@ import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import { Box, Lock, Mail, EyeOff, Eye, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Capacitor } from '@capacitor/core';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+import { SecureStorage } from '@aparajita/capacitor-secure-storage';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -31,6 +34,41 @@ export default function LoginPage() {
 
   const { setAuth } = useAuthStore();
   const router = useRouter();
+
+  React.useEffect(() => {
+    const tryBiometricLogin = async () => {
+      if (!Capacitor.isNativePlatform()) return;
+      const biometricEnabled = localStorage.getItem('cp_biometric_enabled') === 'true';
+      if (!biometricEnabled) return;
+
+      try {
+        const { value: refreshToken } = await SecureStorage.get({ key: 'cp_refresh_token' });
+        if (!refreshToken) return;
+
+        const result = await NativeBiometric.isAvailable();
+        if (!result.isAvailable) return;
+
+        await NativeBiometric.verifyIdentity({
+          reason: "Authenticate to unlock CorePack",
+          title: "Biometric Unlock"
+        });
+
+        setLoading(true);
+        // User authenticated natively, now refresh the session
+        const response = await api.post('/auth/refresh', { refreshToken });
+        const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
+        setAuth(user, accessToken, newRefreshToken);
+        router.push('/');
+      } catch (err) {
+        console.error('Biometric login failed:', err);
+        setLoading(false);
+      }
+    };
+
+    tryBiometricLogin();
+  }, [router, setAuth]);
+
+  // router and setAuth are already declared above
 
   const handleSubmit = async (e) => {
     e.preventDefault();

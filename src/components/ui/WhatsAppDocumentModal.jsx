@@ -5,7 +5,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { X, Send, Loader2, ChevronDown, Search, Plus, UserCheck } from 'lucide-react';
 import { useCustomModal } from '@/components/providers/ModalProvider';
-
+import { Capacitor } from '@capacitor/core';
+import { Contacts } from '@capacitor-community/contacts';
 export function WhatsAppDocumentModal({
   isOpen,
   onClose,
@@ -64,6 +65,43 @@ export function WhatsAppDocumentModal({
 
   const removeRecipient = (indexToRemove) => {
     setRecipients(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const pickContact = async () => {
+    try {
+      if (!Capacitor.isNativePlatform()) return;
+      
+      const permissions = await Contacts.checkPermissions();
+      if (permissions.contacts !== 'granted') {
+        const req = await Contacts.requestPermissions();
+        if (req.contacts !== 'granted') {
+          showAlert({
+            title: 'Permission Denied',
+            message: 'Contact access is required to pick a phone number.',
+            variant: 'warning'
+          });
+          return;
+        }
+      }
+
+      const result = await Contacts.pickContact({ projection: { name: true, phones: true } });
+      if (result.contact) {
+        const contact = result.contact;
+        const phone = contact.phones?.[0]?.number;
+        const name = contact.name?.display;
+        if (phone) {
+          addRecipient(phone, name || 'Phone Contact');
+        } else {
+          showAlert({
+            title: 'No Phone Number',
+            message: 'The selected contact does not have a phone number.',
+            variant: 'warning'
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Contact picker error:', e);
+    }
   };
 
   useEffect(() => {
@@ -269,6 +307,18 @@ export function WhatsAppDocumentModal({
                 </Button>
               )}
             </div>
+
+            {Capacitor.isNativePlatform() && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={pickContact}
+                disabled={isWorking}
+                className="w-full mt-2 flex items-center justify-center gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+              >
+                📱 Select from phone contacts
+              </Button>
+            )}
 
             {/* Saved Customers Dropdown */}
             {isDropdownOpen && (

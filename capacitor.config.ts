@@ -4,9 +4,11 @@ const config: CapacitorConfig = {
   appId: 'com.corepackindia.app',
   appName: 'CorePack',
   webDir: 'public',
+  // Production Configuration: Load the hosted web application directly.
+  // For local Android emulator development, comment this out and use:
+  // url: 'http://10.0.2.2:3000', cleartext: true
   server: {
-    url: 'http://10.0.2.2:3000',
-    cleartext: true
+    url: 'https://core-pack-india.vercel.app'
   },
   plugins: {
     CapacitorHttp: {

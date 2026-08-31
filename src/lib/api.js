@@ -2,8 +2,9 @@ import axios from 'axios';
 import { Capacitor } from '@capacitor/core';
 import { useAuthStore } from '../store/authStore';
 
-let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://core-pack-backend.onrender.com/api/v1';
 
+// Development only: route localhost to Android emulator alias if needed
 if (Capacitor.isNativePlatform() && API_BASE_URL.includes('localhost')) {
   API_BASE_URL = API_BASE_URL.replace('localhost', '10.0.2.2');
 }

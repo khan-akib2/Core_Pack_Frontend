@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { Save, CheckCircle2 } from 'lucide-react';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 export default function SettingsPage() {
   const { showAlert } = useCustomModal();
@@ -34,6 +36,41 @@ export default function SettingsPage() {
 
   const [certificationText, setCertificationText] = useState('');
   const [challanBannerText, setChallanBannerText] = useState('');
+
+  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const [hasBiometric, setHasBiometric] = useState(false);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      NativeBiometric.isAvailable().then((result) => {
+        if (result.isAvailable) {
+          setHasBiometric(true);
+          const enabled = localStorage.getItem('cp_biometric_enabled') === 'true';
+          setIsBiometricEnabled(enabled);
+        }
+      }).catch(err => console.log(err));
+    }
+  }, []);
+
+  const handleBiometricToggle = async () => {
+    if (!isBiometricEnabled) {
+      try {
+        await NativeBiometric.verifyIdentity({
+          reason: "Authenticate to enable Biometric Unlock",
+          title: "Enable Biometric Unlock"
+        });
+        localStorage.setItem('cp_biometric_enabled', 'true');
+        setIsBiometricEnabled(true);
+        showAlert({ title: 'Biometric Enabled', message: 'Biometric unlock is now active.', variant: 'success' });
+      } catch (err) {
+        showAlert({ title: 'Biometric Setup Failed', message: 'Could not verify identity.', variant: 'danger' });
+      }
+    } else {
+      localStorage.removeItem('cp_biometric_enabled');
+      setIsBiometricEnabled(false);
+      showAlert({ title: 'Biometric Disabled', message: 'Biometric unlock is turned off.', variant: 'success' });
+    }
+  };
 
   const { data: company, isLoading } = useQuery({
     queryKey: ['companySettings'],
@@ -192,6 +229,25 @@ export default function SettingsPage() {
           <Input label="Branch Name" value={branch} onChange={(e) => setBranch(e.target.value)} />
         </div>
       </Card>
+
+      {hasBiometric && (
+        <Card className="p-6 border-slate-200/80 space-y-5 bg-orange-50/50">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-orange-600">Device Security (App Only)</h2>
+              <p className="text-xs text-slate-500 mt-1">Enable Biometric Unlock to securely login using your fingerprint or Face ID.</p>
+            </div>
+            <Button
+              type="button"
+              variant={isBiometricEnabled ? "outline" : "default"}
+              onClick={handleBiometricToggle}
+              className={isBiometricEnabled ? "border-red-200 text-red-600 hover:bg-red-50" : ""}
+            >
+              {isBiometricEnabled ? "Disable Biometric Unlock" : "Enable Biometric Unlock"}
+            </Button>
+          </div>
+        </Card>
+      )}
     </form>
   );
 }

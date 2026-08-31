@@ -9,6 +9,9 @@ import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
+
 
 export default function DashboardLayout({ children }) {
   const [mounted, setMounted] = useState(false);
@@ -57,6 +60,45 @@ export default function DashboardLayout({ children }) {
       router.push('/login');
     }
   }, [mounted, isInitializing, isAuthenticated, router]);
+
+  // Register for Push Notifications on Native Platform
+  useEffect(() => {
+    if (mounted && isAuthenticated && Capacitor.isNativePlatform()) {
+      const registerPush = async () => {
+        try {
+          let permStatus = await PushNotifications.checkPermissions();
+          if (permStatus.receive === 'prompt') {
+            permStatus = await PushNotifications.requestPermissions();
+          }
+          if (permStatus.receive !== 'granted') {
+            return;
+          }
+          await PushNotifications.register();
+          
+          // Remove old listeners to prevent duplicates in strict mode
+          await PushNotifications.removeAllListeners();
+          
+          PushNotifications.addListener('registration', async (token) => {
+            console.log('Push registration success, token:', token.value);
+            try {
+              await api.put('/auth/session/push-token', { pushToken: token.value });
+            } catch (err) {
+              console.error('Failed to sync push token:', err);
+            }
+          });
+          
+          PushNotifications.addListener('registrationError', (error) => {
+            console.error('Error on push registration:', error);
+          });
+        } catch (e) {
+          console.error('Push setup failed:', e);
+        }
+      };
+      
+      registerPush();
+    }
+  }, [mounted, isAuthenticated]);
+
 
   if (!mounted || isInitializing) {
     return (
