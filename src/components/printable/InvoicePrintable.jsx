@@ -165,7 +165,7 @@ export function InvoicePrintable({ invoice, company }) {
           {/* LEFT: Logo */}
           <div style={{ flex: 1, padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img
-              src="/logo.png"
+              src="/branding/logo.png"
               alt="Core Pack India"
               style={{
                 width: '100%',
@@ -505,7 +505,7 @@ export function InvoicePrintable({ invoice, company }) {
                 </div>
                 <div style={{ position: 'absolute', bottom: '4px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <img 
-                    src="/signature.png" 
+                    src="/branding/signature.png" 
                     alt="Authorized Signature" 
                     style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
                   />

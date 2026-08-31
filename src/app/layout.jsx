@@ -26,7 +26,7 @@ export const metadata = {
     siteName: 'Core Pack India Portal',
     images: [
       {
-        url: '/logo.png', // Assuming /logo.png exists as seen earlier
+        url: '/branding/logo.png', // Assuming /logo.png exists as seen earlier
         width: 800,
         height: 600,
         alt: 'Core Pack India Logo',
@@ -39,12 +39,12 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Core Pack India | Business Portal',
     description: 'Enterprise Business Management System for Core Pack India',
-    images: ['/logo.png'],
+    images: ['/branding/logo.png'],
   },
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: '/icons/favicon.png',
+    shortcut: '/icons/favicon.png',
+    apple: '/icons/favicon.png',
   },
   robots: {
     index: true, // You might want this false if it's an internal portal, but user asked for SEO friendly

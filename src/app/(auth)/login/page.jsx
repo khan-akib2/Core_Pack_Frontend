@@ -64,7 +64,7 @@ export default function LoginPage() {
         <div className="hidden md:flex w-1/2 relative rounded-3xl overflow-hidden bg-white">
           {/* Aesthetic Background Image */}
           <div className="absolute inset-0 z-0">
-             <img src="/images/login_bg.png?v=2" alt="Aesthetic Background" className="w-full h-full object-cover scale-105" />
+             <img src="/images/login-bg.jpg?v=2" alt="Aesthetic Background" className="w-full h-full object-cover scale-105" />
           </div>
           
           <div className="relative z-10 p-6 lg:p-8 w-full h-full flex flex-col">
@@ -94,7 +94,7 @@ export default function LoginPage() {
           >
             {/* Logo area */}
             <div className="mb-8 mt-0">
-              <img src="/corepack-logo-trimmed.png" alt="Core Pack India" className="h-11 md:h-14 object-contain mix-blend-multiply" style={{ mixBlendMode: 'multiply' }} />
+              <img src="/branding/logo-trimmed.png" alt="Core Pack India" className="h-11 md:h-14 object-contain mix-blend-multiply" style={{ mixBlendMode: 'multiply' }} />
             </div>
 
             <div className="mb-6">

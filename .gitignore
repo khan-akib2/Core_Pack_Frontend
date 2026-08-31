@@ -44,3 +44,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
+# Android & Capacitor Build Artifacts
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json

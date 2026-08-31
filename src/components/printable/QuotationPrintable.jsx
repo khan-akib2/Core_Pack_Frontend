@@ -154,7 +154,7 @@ export function QuotationPrintable({ quotation, company }) {
           {/* LEFT: Logo */}
           <div style={{ flex: 1, padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img
-              src="/logo.png"
+              src="/branding/logo.png"
               alt="Core Pack India"
               style={{
                 width: '100%',
@@ -364,7 +364,7 @@ export function QuotationPrintable({ quotation, company }) {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '230px' }}>
                 <img 
-                  src="/signature.png" 
+                  src="/branding/signature.png" 
                   alt="Authorized Signature" 
                   style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
                 />

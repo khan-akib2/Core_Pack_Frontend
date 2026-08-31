@@ -21,7 +21,7 @@ export function AuthorizedSignature({
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: lineWidth, marginTop: '4px' }}>
         <img 
-          src="/signature.png" 
+          src="/branding/signature.png" 
           alt="Authorized Signature" 
           style={{ 
             height: '80px', 
