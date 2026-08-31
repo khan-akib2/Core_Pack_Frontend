@@ -104,13 +104,16 @@ export function ChallanPrintable({ challan, company }) {
           {/* LEFT: Logo */}
           <div style={{ flex: 1, padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img
-              src="/branding/logo-trimmed.png"
+              src="/logo.png"
               alt="Core Pack India"
               style={{
                 width: '100%',
                 height: '100%',
                 maxHeight: '190px',
                 objectFit: 'contain',
+                objectPosition: '23px',
+                transform: 'scale(1.4)',
+                transformOrigin: 'center center',
                 mixBlendMode: 'multiply'
               }}
             />
@@ -276,7 +279,7 @@ export function ChallanPrintable({ challan, company }) {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '240px' }}>
               <img 
-                src="/branding/signature.png" 
+                src="/signature.png" 
                 alt="Authorized Signature" 
                 style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
               />
