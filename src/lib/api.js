@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Capacitor } from '@capacitor/core';
+import { SecureStorage } from '@aparajita/capacitor-secure-storage';
 import { useAuthStore } from '../store/authStore';
 
 let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://core-pack-backend.onrender.com/api/v1';
@@ -74,7 +75,20 @@ api.interceptors.response.use(
 
       try {
         // Attempt to refresh
-        const storedRefreshToken = typeof window !== 'undefined' ? localStorage.getItem('cp_refresh_token') : null;
+        let storedRefreshToken = null;
+        if (typeof window !== 'undefined') {
+          if (Capacitor.isNativePlatform()) {
+            try {
+              const res = await SecureStorage.get({ key: 'cp_refresh_token' });
+              storedRefreshToken = res.value;
+            } catch (e) {
+              storedRefreshToken = localStorage.getItem('cp_refresh_token');
+            }
+          } else {
+            storedRefreshToken = localStorage.getItem('cp_refresh_token');
+          }
+        }
+        
         const { data } = await api.post('/auth/refresh-token', {}, { 
           withCredentials: true,
           headers: storedRefreshToken ? { 'x-refresh-token': storedRefreshToken } : {}
@@ -82,7 +96,11 @@ api.interceptors.response.use(
         const newToken = data.data.accessToken;
         
         if (data.data.refreshToken && typeof window !== 'undefined') {
-          localStorage.setItem('cp_refresh_token', data.data.refreshToken);
+          if (Capacitor.isNativePlatform()) {
+            await SecureStorage.set({ key: 'cp_refresh_token', value: data.data.refreshToken }).catch(console.error);
+          } else {
+            localStorage.setItem('cp_refresh_token', data.data.refreshToken);
+          }
         }
 
         // Save new token to memory
