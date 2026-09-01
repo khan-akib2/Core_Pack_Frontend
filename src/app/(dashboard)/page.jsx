@@ -110,8 +110,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Dispatches & Delivery Challans Table Section */}
-      <Card className="p-6 space-y-4 border-slate-200/80">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <Card className="p-4 sm:p-6 space-y-4 border-slate-200/80 w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
           <div>
             <h3 className="text-base font-bold text-slate-900">Factory Dispatches & Challans</h3>
             <p className="text-xs text-slate-500 mt-0.5">Real-time vehicle movement logs</p>
@@ -164,8 +164,8 @@ export default function DashboardPage() {
       </Card>
 
       {/* Recent Tax Invoices Table Section */}
-      <Card className="p-6 space-y-4 border-slate-200/80">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <Card className="p-4 sm:p-6 space-y-4 border-slate-200/80 w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
           <div>
             <h3 className="text-base font-bold text-slate-900">Recent Tax Invoices</h3>
             <p className="text-xs text-slate-500 mt-0.5">GST billing activity & payment status</p>

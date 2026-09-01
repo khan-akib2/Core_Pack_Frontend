@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+import { api } from '@/lib/api';
+
 export function notifyNotificationsUpdated() {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('notifications_state_changed'));
@@ -13,11 +15,20 @@ export function getStoredNotificationTimes() {
   return { readUntil, clearedAt };
 }
 
-export function markAllNotificationsRead() {
+export async function markAllNotificationsRead() {
   if (typeof window === 'undefined') return;
-  const now = Date.now();
-  localStorage.setItem('notifications_read_until', String(now));
-  notifyNotificationsUpdated();
+  try {
+    const response = await api.post('/notifications/mark-read');
+    if (response.data.success) {
+      localStorage.setItem('notifications_read_until', String(response.data.serverTime));
+      notifyNotificationsUpdated();
+    }
+  } catch (error) {
+    console.error('Failed to mark notifications read', error);
+    // fallback
+    localStorage.setItem('notifications_read_until', String(Date.now()));
+    notifyNotificationsUpdated();
+  }
 }
 
 export function clearAllNotifications() {

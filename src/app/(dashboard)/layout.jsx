@@ -11,13 +11,16 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+import { SecureStorage } from '@aparajita/capacitor-secure-storage';
+import { Lock } from 'lucide-react';
 
 
 export default function DashboardLayout({ children }) {
   const [mounted, setMounted] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, isInitializing, setInitialized } = useAuthStore();
+  const { isAuthenticated, isInitializing, setInitialized, isUnlocked, setUnlocked, setAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -60,6 +63,37 @@ export default function DashboardLayout({ children }) {
       router.push('/login');
     }
   }, [mounted, isInitializing, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (mounted && isAuthenticated && !isUnlocked && Capacitor.isNativePlatform()) {
+      const promptBiometric = async () => {
+        try {
+          const { value: refreshToken } = await SecureStorage.get({ key: 'cp_refresh_token' });
+          if (!refreshToken) {
+            setUnlocked(true);
+            return;
+          }
+          const result = await NativeBiometric.isAvailable();
+          if (!result.isAvailable) {
+            setUnlocked(true);
+            return;
+          }
+          await NativeBiometric.verifyIdentity({
+            reason: "Authenticate to unlock CorePack",
+            title: "Biometric Unlock"
+          });
+          
+          const response = await api.post('/auth/refresh', { refreshToken });
+          const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
+          setAuth(user, accessToken, newRefreshToken);
+          setUnlocked(true);
+        } catch (err) {
+          console.error('Biometric failed:', err);
+        }
+      };
+      promptBiometric();
+    }
+  }, [mounted, isAuthenticated, isUnlocked, setUnlocked, setAuth]);
 
   // Register for Push Notifications on Native Platform
   useEffect(() => {
@@ -109,6 +143,24 @@ export default function DashboardLayout({ children }) {
   }
 
   if (!isAuthenticated) return null;
+
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen bg-[#0B132A] flex flex-col items-center justify-center p-4 antialiased">
+        <div className="w-16 h-16 mb-4 text-orange-500 opacity-80 flex items-center justify-center bg-orange-500/10 rounded-full">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl text-white font-semibold tracking-tight">App Locked</h2>
+        <p className="text-slate-400 mt-2 text-sm">Please verify your identity to continue.</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-8 px-6 py-2.5 bg-gradient-to-r from-[#E85C0D] to-[#F97316] text-white font-medium rounded-xl shadow-md"
+        >
+          Unlock CorePack
+        </button>
+      </div>
+    );
+  }
 
   return (
     <SmoothScrollProvider>

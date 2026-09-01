@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { X, Printer, Mail, MessageCircle, ArrowRight } from 'lucide-react';
+import { X, Printer, Mail, MessageCircle, ArrowRight, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { InvoicePrintable } from '@/components/printable/InvoicePrintable';
 import { QuotationPrintable } from '@/components/printable/QuotationPrintable';
@@ -10,18 +10,21 @@ import { EmailDocumentModal } from '@/components/ui/EmailDocumentModal';
 import { WhatsAppDocumentModal } from '@/components/ui/WhatsAppDocumentModal';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
+import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
+  const { showAlert } = useCustomModal();
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
 
   const endpointMap = {
     invoice: `/invoices/${documentId}`,
     quotation: `/quotations/${documentId}`,
-    challan: `/delivery-challans/${documentId}`
+    challan: `/challans/${documentId}`
   };
 
-  const { data: document, isLoading } = useQuery({
+  const { data: document, isLoading, error } = useQuery({
     queryKey: [type, documentId],
     queryFn: async () => {
       if (!documentId) return null;
@@ -41,6 +44,14 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
   });
 
   const handlePrint = () => {
+    if (Capacitor.isNativePlatform()) {
+      showAlert({
+        title: 'Native Print',
+        message: 'Direct printing is not supported natively. Please use the WhatsApp or Email options, or print from the Web Dashboard.',
+        variant: 'info'
+      });
+      return;
+    }
     window.print();
   };
 
@@ -82,8 +93,8 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
           email: document.customerSnapshot?.email || '',
           phone: document.customerSnapshot?.phone || '',
           customerId: document.customerId,
-          emailApi: `/delivery-challans/${documentId}/send-email/challan`,
-          whatsappApi: `/delivery-challans/${documentId}/send-whatsapp/challan`,
+          emailApi: `/challans/${documentId}/send-email/challan`,
+          whatsappApi: `/challans/${documentId}/send-whatsapp/challan`,
           detailsLink: `/delivery-challans/${documentId}`
         };
       default:
@@ -128,20 +139,29 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
           </div>
 
           <style>{`
-            .preview-zoom { zoom: 0.38; }
-            @media (min-width: 360px) { .preview-zoom { zoom: 0.42; } }
-            @media (min-width: 400px) { .preview-zoom { zoom: 0.46; } }
-            @media (min-width: 480px) { .preview-zoom { zoom: 0.55; } }
-            @media (min-width: 640px) { .preview-zoom { zoom: 0.75; } }
-            @media (min-width: 768px) { .preview-zoom { zoom: 0.85; } }
-            @media (min-width: 1024px) { .preview-zoom { zoom: 0.95; } }
+            .preview-zoom { transform: scale(0.38); transform-origin: top center; margin-bottom: -695px; }
+            @media (min-width: 360px) { .preview-zoom { transform: scale(0.42); margin-bottom: -650px; } }
+            @media (min-width: 400px) { .preview-zoom { transform: scale(0.46); margin-bottom: -605px; } }
+            @media (min-width: 480px) { .preview-zoom { transform: scale(0.55); margin-bottom: -504px; } }
+            @media (min-width: 640px) { .preview-zoom { transform: scale(0.75); margin-bottom: -280px; } }
+            @media (min-width: 768px) { .preview-zoom { transform: scale(0.85); margin-bottom: -168px; } }
+            @media (min-width: 1024px) { .preview-zoom { transform: scale(0.95); margin-bottom: -56px; } }
           `}</style>
           {/* Document Body */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-200/50 p-2 sm:p-6 flex justify-center items-start">
-            {isLoading || !document || !company ? (
+            {isLoading || !company ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
                 <p className="text-sm text-slate-500">Loading document...</p>
+              </div>
+            ) : !document || error ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="text-rose-500 mb-2">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <p className="text-sm text-slate-700 font-medium mb-1">Failed to load document</p>
+                <p className="text-xs text-slate-500 mb-4 text-center max-w-xs">{error?.response?.data?.message || error?.message || 'The document could not be found or you are offline.'}</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Retry</Button>
               </div>
             ) : (
               <div className="preview-zoom bg-white shadow-lg border border-slate-200 origin-top">

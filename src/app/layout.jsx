@@ -2,6 +2,7 @@ import React from 'react';
 import './globals.css';
 import ReactQueryProvider from '@/components/providers/ReactQueryProvider';
 import { ModalProvider } from '@/components/providers/ModalProvider';
+import { CapacitorInit } from '@/components/providers/CapacitorInit';
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://corepackindia.com'),
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="bg-slate-950 text-slate-100 antialiased font-sans selection:bg-amber-500 selection:text-slate-950">
+        <CapacitorInit />
         <ReactQueryProvider>
           <ModalProvider>
             {children}

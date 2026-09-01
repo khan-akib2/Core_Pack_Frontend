@@ -98,6 +98,6 @@ main {
   }
   @page {
     size: A4 portrait;
-    margin: 8mm 10mm;
+    margin: 0;
   }
 }

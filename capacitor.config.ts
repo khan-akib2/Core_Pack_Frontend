@@ -8,7 +8,8 @@ const config: CapacitorConfig = {
   // For local Android emulator development, comment this out and use:
   // url: 'http://10.0.2.2:3000', cleartext: true
   server: {
-    url: 'https://core-pack-india.vercel.app'
+    url: 'https://core-pack-india.vercel.app',
+    errorPath: 'offline.html'
   },
   plugins: {
     CapacitorHttp: {

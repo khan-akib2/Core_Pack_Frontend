@@ -10,6 +10,10 @@ import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import * as XLSX from 'xlsx';
 import { ReportPrintable } from '@/components/printable/ReportPrintable';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { useCustomModal } from '@/components/providers/ModalProvider';
 
 // Helper to calculate start/end dates for a given month/year
 const getMonthDates = (year, monthIndex) => {
@@ -44,6 +48,7 @@ const TrendIndicator = ({ current = 0, previous = 0 }) => {
 };
 
 export default function ReportsPage() {
+  const { showAlert } = useCustomModal();
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     return { month: now.getMonth(), year: now.getFullYear() };
@@ -122,11 +127,22 @@ export default function ReportsPage() {
   const summary = salesReport?.summary || {};
   const prevSummary = prevSalesReport?.summary || {};
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
+    if (Capacitor.isNativePlatform()) {
+      // In a real native PDF flow, we would generate a PDF blob and write it via Filesystem.
+      // Since window.print() is used for web, we will alert the user for now 
+      // or ideally use @capacitor-community/printer. But we are setting up generic Share below.
+      showAlert({
+        title: 'Native Print',
+        message: 'Printing native PDFs requires printer plugins. Use Web view or Excel export for data.',
+        variant: 'info'
+      });
+      return;
+    }
     window.print();
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const b2b = gstr1Report?.b2bInvoices || [];
     const b2c = gstr1Report?.b2cInvoices || [];
     const all = [...b2b, ...b2c];
@@ -154,7 +170,29 @@ export default function ReportsPage() {
     XLSX.utils.book_append_sheet(wb, ws, "GSTR1 Data");
     
     const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
-    XLSX.writeFile(wb, `GSTR1_Sales_Report_${monthName}_${selectedDate.year}.xlsx`);
+    const fileName = `GSTR1_Sales_Report_${monthName}_${selectedDate.year}.xlsx`;
+    
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const base64Data = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+        await Share.share({
+          title: fileName,
+          text: 'Here is the exported GSTR1 Sales Report.',
+          url: result.uri,
+          dialogTitle: 'Save or Share Excel Report'
+        });
+      } catch (err) {
+        console.error('File export error:', err);
+        showAlert({ title: 'Export Failed', message: 'Could not export Excel file on device.', variant: 'danger' });
+      }
+    } else {
+      XLSX.writeFile(wb, fileName);
+    }
   };
 
   const handleMonthChange = (e) => {

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core Pack India - Offline</title>
+  <style>
+    body {
+      background-color: #070C18;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #94A3B8;
+      font-size: 14px;
+      margin-bottom: 30px;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+    button {
+      background-color: #F58220;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(245, 130, 32, 0.4);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    svg {
+      width: 64px;
+      height: 64px;
+      color: #F58220;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm1-12c2.21 0 4 1.79 4 4 0 2-3 3.5-3 6h-2c0-3.5 3-4.5 3-6 0-1.1-.9-2-2-2s-2 .9-2 2H9c0-2.21 1.79-4 4-4z" />
+  </svg>
+  <h1>You're Offline</h1>
+  <p>Please check your internet connection and try again to access Core Pack India.</p>
+  <button onclick="window.location.href = 'https://core-pack-india.vercel.app'">Retry Connection</button>
+  <script>
+    window.addEventListener('online', () => {
+      window.location.href = 'https://core-pack-india.vercel.app';
+    });
+  </script>
+</body>
+</html>
