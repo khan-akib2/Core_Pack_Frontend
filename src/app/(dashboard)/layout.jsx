@@ -64,36 +64,41 @@ export default function DashboardLayout({ children }) {
     }
   }, [mounted, isInitializing, isAuthenticated, router]);
 
-  useEffect(() => {
-    if (mounted && isAuthenticated && !isUnlocked && Capacitor.isNativePlatform()) {
-      const promptBiometric = async () => {
-        try {
-          const { value: refreshToken } = await SecureStorage.get({ key: 'cp_refresh_token' });
-          if (!refreshToken) {
-            setUnlocked(true);
-            return;
-          }
-          const result = await NativeBiometric.isAvailable();
-          if (!result.isAvailable) {
-            setUnlocked(true);
-            return;
-          }
-          await NativeBiometric.verifyIdentity({
-            reason: "Authenticate to unlock CorePack",
-            title: "Biometric Unlock"
-          });
-          
-          const response = await api.post('/auth/refresh', { refreshToken });
-          const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
-          setAuth(user, accessToken, newRefreshToken);
-          setUnlocked(true);
-        } catch (err) {
-          console.error('Biometric failed:', err);
-        }
-      };
-      promptBiometric();
+  const triggerBiometric = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      setUnlocked(true);
+      return;
     }
-  }, [mounted, isAuthenticated, isUnlocked, setUnlocked, setAuth]);
+    try {
+      const { value: refreshToken } = await SecureStorage.get({ key: 'cp_refresh_token' });
+      if (!refreshToken) {
+        setUnlocked(true);
+        return;
+      }
+      const result = await NativeBiometric.isAvailable();
+      if (!result.isAvailable) {
+        setUnlocked(true);
+        return;
+      }
+      await NativeBiometric.verifyIdentity({
+        reason: "Authenticate to unlock CorePack",
+        title: "Biometric Unlock"
+      });
+      
+      const response = await api.post('/auth/refresh', { refreshToken });
+      const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
+      setAuth(user, accessToken, newRefreshToken);
+      setUnlocked(true);
+    } catch (err) {
+      console.error('Biometric failed:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (mounted && isAuthenticated && !isUnlocked) {
+      triggerBiometric();
+    }
+  }, [mounted, isAuthenticated, isUnlocked]);
 
   // Register for Push Notifications on Native Platform
   useEffect(() => {
@@ -153,7 +158,7 @@ export default function DashboardLayout({ children }) {
         <h2 className="text-xl text-white font-semibold tracking-tight">App Locked</h2>
         <p className="text-slate-400 mt-2 text-sm">Please verify your identity to continue.</p>
         <button 
-          onClick={() => window.location.reload()} 
+          onClick={triggerBiometric} 
           className="mt-8 px-6 py-2.5 bg-gradient-to-r from-[#E85C0D] to-[#F97316] text-white font-medium rounded-xl shadow-md"
         >
           Unlock CorePack
