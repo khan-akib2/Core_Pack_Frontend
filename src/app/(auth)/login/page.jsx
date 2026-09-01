@@ -55,7 +55,7 @@ export default function LoginPage() {
 
         setLoading(true);
         // User authenticated natively, now refresh the session
-        const response = await api.post('/auth/refresh', { refreshToken });
+        const response = await api.post('/auth/refresh-token', { refreshToken });
         const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
         setAuth(user, accessToken, newRefreshToken);
         router.push('/');

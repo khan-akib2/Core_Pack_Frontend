@@ -70,7 +70,19 @@ export default function DashboardLayout({ children }) {
       return;
     }
     try {
-      const { value: refreshToken } = await SecureStorage.get({ key: 'cp_refresh_token' });
+      let refreshToken = null;
+      try {
+        const res = await SecureStorage.get({ key: 'cp_refresh_token' });
+        refreshToken = res.value;
+      } catch (e) {
+        // If SecureStorage throws (key not found), check localStorage for old tokens
+        refreshToken = localStorage.getItem('cp_refresh_token');
+        if (refreshToken) {
+          await SecureStorage.set({ key: 'cp_refresh_token', value: refreshToken }).catch(() => {});
+          localStorage.removeItem('cp_refresh_token');
+        }
+      }
+
       if (!refreshToken) {
         setUnlocked(true);
         return;
@@ -85,12 +97,17 @@ export default function DashboardLayout({ children }) {
         title: "Biometric Unlock"
       });
       
-      const response = await api.post('/auth/refresh', { refreshToken });
+      const response = await api.post('/auth/refresh-token', { refreshToken });
       const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
       setAuth(user, accessToken, newRefreshToken);
       setUnlocked(true);
     } catch (err) {
       console.error('Biometric failed:', err);
+      // If refresh token is expired or revoked (401 or 400), force logout so they aren't stuck forever
+      if (err.response?.status === 401 || err.response?.status === 400 || err.response?.status === 404) {
+         useAuthStore.getState().logout();
+         window.location.href = '/login';
+      }
     }
   };
 
