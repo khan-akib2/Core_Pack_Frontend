@@ -20,6 +20,8 @@ export default function DashboardLayout({ children }) {
   const [mounted, setMounted] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
+  const [isUnlocking, setIsUnlocking] = useState(false);
   const { isAuthenticated, isInitializing, setInitialized, isUnlocked, setUnlocked, setAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -69,6 +71,9 @@ export default function DashboardLayout({ children }) {
       setUnlocked(true);
       return;
     }
+    if (isUnlocking) return;
+    setIsUnlocking(true);
+    setUnlockError('');
     try {
       let refreshToken = null;
       try {
@@ -84,12 +89,14 @@ export default function DashboardLayout({ children }) {
       }
 
       if (!refreshToken) {
-        setUnlocked(true);
+        setUnlockError('No refresh token found. Please log out and log in again.');
+        setIsUnlocking(false);
         return;
       }
       const result = await NativeBiometric.isAvailable();
       if (!result.isAvailable) {
-        setUnlocked(true);
+        setUnlockError('Biometric hardware not available on this device.');
+        setIsUnlocking(false);
         return;
       }
       await NativeBiometric.verifyIdentity({
@@ -103,11 +110,18 @@ export default function DashboardLayout({ children }) {
       setUnlocked(true);
     } catch (err) {
       console.error('Biometric failed:', err);
+      if (err.response) {
+        setUnlockError(`Network/Auth Error: ${err.response.status} - ${err.response.data?.message || 'Failed'}`);
+      } else {
+        setUnlockError(`Biometric Error: ${err.message || 'Verification failed or canceled'}`);
+      }
       // If refresh token is expired or revoked (401 or 400), force logout so they aren't stuck forever
       if (err.response?.status === 401 || err.response?.status === 400 || err.response?.status === 404) {
          useAuthStore.getState().logout();
          window.location.href = '/login';
       }
+    } finally {
+      setIsUnlocking(false);
     }
   };
 
@@ -173,13 +187,33 @@ export default function DashboardLayout({ children }) {
           <Lock className="w-8 h-8" />
         </div>
         <h2 className="text-xl text-white font-semibold tracking-tight">App Locked</h2>
-        <p className="text-slate-400 mt-2 text-sm">Please verify your identity to continue.</p>
+        <p className="text-slate-400 mt-2 text-sm text-center max-w-xs">Please verify your identity to continue.</p>
+        
+        {unlockError && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg max-w-xs text-center">
+            <p className="text-red-400 text-xs">{unlockError}</p>
+          </div>
+        )}
+
         <button 
           onClick={triggerBiometric} 
-          className="mt-8 px-6 py-2.5 bg-gradient-to-r from-[#E85C0D] to-[#F97316] text-white font-medium rounded-xl shadow-md"
+          disabled={isUnlocking}
+          className="mt-8 px-6 py-2.5 bg-gradient-to-r from-[#E85C0D] to-[#F97316] hover:from-[#D4530A] hover:to-[#EA580C] text-white font-medium rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-          Unlock CorePack
+          {isUnlocking ? 'Verifying...' : 'Unlock CorePack'}
         </button>
+        
+        {unlockError && (
+          <button 
+            onClick={() => {
+              useAuthStore.getState().logout();
+              window.location.href = '/login';
+            }} 
+            className="mt-4 text-xs text-slate-500 hover:text-slate-300 underline"
+          >
+            Force Logout
+          </button>
+        )}
       </div>
     );
   }
