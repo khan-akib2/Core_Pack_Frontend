@@ -8,7 +8,6 @@ export const useAuthStore = create((set) => ({
   token: typeof window !== 'undefined' ? (localStorage.getItem('cp_access_token') || null) : null,
   isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('cp_access_token') : false,
   isInitializing: false,
-  isUnlocked: typeof window !== 'undefined' ? !(Capacitor.isNativePlatform() && localStorage.getItem('cp_biometric_enabled') === 'true') : true,
 
   setAuth: (user, token, refreshToken) => {
     if (typeof window !== 'undefined') {
@@ -37,9 +36,6 @@ export const useAuthStore = create((set) => ({
     set({ isInitializing: value });
   },
 
-  setUnlocked: (value) => {
-    set({ isUnlocked: value });
-  },
 
   logout: () => {
     if (typeof window !== 'undefined') {
@@ -47,11 +43,10 @@ export const useAuthStore = create((set) => ({
       localStorage.removeItem('cp_access_token');
       if (Capacitor.isNativePlatform()) {
         SecureStorage.remove({ key: 'cp_refresh_token' }).catch(console.error);
-        localStorage.removeItem('cp_biometric_enabled');
       } else {
         localStorage.removeItem('cp_refresh_token');
       }
     }
-    set({ user: null, token: null, isAuthenticated: false, isInitializing: false, isUnlocked: false });
+    set({ user: null, token: null, isAuthenticated: false, isInitializing: false });
   }
 }));

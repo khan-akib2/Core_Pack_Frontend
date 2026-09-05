@@ -79,7 +79,8 @@ export default function DeliveryChallansPage() {
       </Card>
 
       <Card className="p-0 overflow-hidden border-slate-200/80">
-        <div className="overflow-x-auto">
+        {/* Desktop View */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -129,6 +130,40 @@ export default function DeliveryChallansPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="sm:hidden flex flex-col gap-3 p-3">
+          {isLoading ? (
+            <div className="p-6 text-center text-slate-400 font-medium text-xs">Loading delivery challans...</div>
+          ) : challans.length === 0 ? (
+            <div className="p-6 text-center text-slate-400 font-medium text-xs">No delivery challans found.</div>
+          ) : (
+            challans.map((dc) => (
+              <div key={dc._id} className="border border-slate-100 rounded-xl p-3.5 space-y-3 bg-slate-50/50">
+                <div className="flex justify-between items-center">
+                  <Link href={`/delivery-challans/${dc._id}`} className="font-mono font-semibold text-orange-600 text-sm">
+                    {dc.challanNumber}
+                  </Link>
+                  <span className="text-xs text-slate-500">{formatDate(dc.challanDate)}</span>
+                </div>
+                <div className="font-semibold text-slate-900 text-sm">
+                  {dc.customerSnapshot?.companyName || dc.customerSnapshot?.name}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-xs uppercase text-slate-600">{dc.vehicleNo || 'N/A'}</span>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={() => setPreviewModal({ isOpen: true, type: 'challan', id: dc._id })}>
+                      <Eye className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-7 text-xs px-2 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => handleDelete(dc._id, dc.challanNumber)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Card>
 

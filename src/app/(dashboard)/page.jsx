@@ -121,7 +121,8 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop View */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
             <thead>
               <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
@@ -161,6 +162,35 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile View */}
+        <div className="sm:hidden flex flex-col gap-3">
+          {challansLoading ? (
+            <div className="py-6 text-center text-slate-400 font-medium text-xs">Loading dispatches...</div>
+          ) : recentChallans.length === 0 ? (
+            <div className="py-6 text-center text-slate-400 font-medium text-xs">No active dispatches found.</div>
+          ) : (
+            recentChallans.map((c) => (
+              <div key={c._id} className="border border-slate-100 rounded-xl p-3.5 space-y-2 bg-slate-50/50">
+                <div className="flex justify-between items-center">
+                  <Link href={`/delivery-challans/${c._id}`} className="font-mono font-semibold text-orange-600 text-sm">
+                    {c.challanNumber}
+                  </Link>
+                  <Badge variant={c.status === 'Invoiced' ? 'success' : 'info'}>
+                    {c.status || 'Dispatched'}
+                  </Badge>
+                </div>
+                <div className="font-semibold text-slate-900 text-sm">
+                  {c.customerSnapshot?.companyName || c.customerSnapshot?.name}
+                </div>
+                <div className="flex justify-between items-center text-slate-500 text-xs">
+                  <span className="font-mono uppercase">{c.vehicleNo || 'MH-04-AB-1234'}</span>
+                  <span>{formatDate(c.challanDate)}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </Card>
 
       {/* Recent Tax Invoices Table Section */}
@@ -175,7 +205,8 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop View */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
             <thead>
               <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
@@ -214,6 +245,35 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="sm:hidden flex flex-col gap-3">
+          {invoicesLoading ? (
+            <div className="py-6 text-center text-slate-400 font-medium text-xs">Loading invoices...</div>
+          ) : recentInvoices.length === 0 ? (
+            <div className="py-6 text-center text-slate-400 font-medium text-xs">No invoices issued yet.</div>
+          ) : (
+            recentInvoices.map((inv) => (
+              <div key={inv._id} className="border border-slate-100 rounded-xl p-3.5 space-y-2 bg-slate-50/50">
+                <div className="flex justify-between items-center">
+                  <Link href={`/invoices/${inv._id}`} className="font-mono font-semibold text-orange-600 text-sm">
+                    {inv.invoiceNumber}
+                  </Link>
+                  <Badge variant={inv.paymentStatus === 'Paid' ? 'success' : inv.paymentStatus === 'Partial' ? 'warning' : 'danger'}>
+                    {inv.paymentStatus}
+                  </Badge>
+                </div>
+                <div className="font-semibold text-slate-900 text-sm">
+                  {inv.customerSnapshot?.companyName || inv.customerSnapshot?.name}
+                </div>
+                <div className="flex justify-between items-center text-slate-500 text-xs">
+                  <span className="font-bold text-slate-900 text-sm">{formatCurrency(inv.grandTotal)}</span>
+                  <span>{formatDate(inv.invoiceDate)}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Card>
     </div>

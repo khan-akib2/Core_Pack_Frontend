@@ -9,9 +9,6 @@ import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Capacitor } from '@capacitor/core';
-import { PushNotifications } from '@capacitor/push-notifications';
-import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage';
 import { Lock } from 'lucide-react';
 
@@ -20,9 +17,7 @@ export default function DashboardLayout({ children }) {
   const [mounted, setMounted] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [unlockError, setUnlockError] = useState('');
-  const [isUnlocking, setIsUnlocking] = useState(false);
-  const { isAuthenticated, isInitializing, setInitialized, isUnlocked, setUnlocked, setAuth } = useAuthStore();
+  const { isAuthenticated, isInitializing, setInitialized, setAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -66,108 +61,7 @@ export default function DashboardLayout({ children }) {
     }
   }, [mounted, isInitializing, isAuthenticated, router]);
 
-  const triggerBiometric = async () => {
-    if (!Capacitor.isNativePlatform()) {
-      setUnlocked(true);
-      return;
-    }
-    if (isUnlocking) return;
-    setIsUnlocking(true);
-    setUnlockError('');
-    try {
-      let refreshToken = null;
-      try {
-        const res = await SecureStorage.get({ key: 'cp_refresh_token' });
-        refreshToken = res.value;
-      } catch (e) {
-        // If SecureStorage throws (key not found), check localStorage for old tokens
-        refreshToken = localStorage.getItem('cp_refresh_token');
-        if (refreshToken) {
-          await SecureStorage.set({ key: 'cp_refresh_token', value: refreshToken }).catch(() => {});
-          localStorage.removeItem('cp_refresh_token');
-        }
-      }
 
-      if (!refreshToken) {
-        setUnlockError('No refresh token found. Please log out and log in again.');
-        setIsUnlocking(false);
-        return;
-      }
-      const result = await NativeBiometric.isAvailable();
-      if (!result.isAvailable) {
-        setUnlockError('Biometric hardware not available on this device.');
-        setIsUnlocking(false);
-        return;
-      }
-      await NativeBiometric.verifyIdentity({
-        reason: "Authenticate to unlock CorePack",
-        title: "Biometric Unlock"
-      });
-      
-      const response = await api.post('/auth/refresh-token', { refreshToken });
-      const { user, accessToken, refreshToken: newRefreshToken } = response.data.data;
-      setAuth(user, accessToken, newRefreshToken);
-      setUnlocked(true);
-    } catch (err) {
-      console.error('Biometric failed:', err);
-      if (err.response) {
-        setUnlockError(`Network/Auth Error: ${err.response.status} - ${err.response.data?.message || 'Failed'}`);
-      } else {
-        setUnlockError(`Biometric Error: ${err.message || 'Verification failed or canceled'}`);
-      }
-      // If refresh token is expired or revoked (401 or 400), force logout so they aren't stuck forever
-      if (err.response?.status === 401 || err.response?.status === 400 || err.response?.status === 404) {
-         useAuthStore.getState().logout();
-         window.location.href = '/login';
-      }
-    } finally {
-      setIsUnlocking(false);
-    }
-  };
-
-  useEffect(() => {
-    if (mounted && isAuthenticated && !isUnlocked) {
-      triggerBiometric();
-    }
-  }, [mounted, isAuthenticated, isUnlocked]);
-
-  // Register for Push Notifications on Native Platform
-  useEffect(() => {
-    if (mounted && isAuthenticated && Capacitor.isNativePlatform()) {
-      const registerPush = async () => {
-        try {
-          let permStatus = await PushNotifications.checkPermissions();
-          if (permStatus.receive === 'prompt') {
-            permStatus = await PushNotifications.requestPermissions();
-          }
-          if (permStatus.receive !== 'granted') {
-            return;
-          }
-          await PushNotifications.register();
-          
-          // Remove old listeners to prevent duplicates in strict mode
-          await PushNotifications.removeAllListeners();
-          
-          PushNotifications.addListener('registration', async (token) => {
-            console.log('Push registration success, token:', token.value);
-            try {
-              await api.put('/auth/session/push-token', { pushToken: token.value });
-            } catch (err) {
-              console.error('Failed to sync push token:', err);
-            }
-          });
-          
-          PushNotifications.addListener('registrationError', (error) => {
-            console.error('Error on push registration:', error);
-          });
-        } catch (e) {
-          console.error('Push setup failed:', e);
-        }
-      };
-      
-      registerPush();
-    }
-  }, [mounted, isAuthenticated]);
 
 
   if (!mounted || isInitializing) {
@@ -180,43 +74,7 @@ export default function DashboardLayout({ children }) {
 
   if (!isAuthenticated) return null;
 
-  if (!isUnlocked) {
-    return (
-      <div className="min-h-screen bg-[#0B132A] flex flex-col items-center justify-center p-4 antialiased">
-        <div className="w-16 h-16 mb-4 text-orange-500 opacity-80 flex items-center justify-center bg-orange-500/10 rounded-full">
-          <Lock className="w-8 h-8" />
-        </div>
-        <h2 className="text-xl text-white font-semibold tracking-tight">App Locked</h2>
-        <p className="text-slate-400 mt-2 text-sm text-center max-w-xs">Please verify your identity to continue.</p>
-        
-        {unlockError && (
-          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg max-w-xs text-center">
-            <p className="text-red-400 text-xs">{unlockError}</p>
-          </div>
-        )}
 
-        <button 
-          onClick={triggerBiometric} 
-          disabled={isUnlocking}
-          className="mt-8 px-6 py-2.5 bg-gradient-to-r from-[#E85C0D] to-[#F97316] hover:from-[#D4530A] hover:to-[#EA580C] text-white font-medium rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          {isUnlocking ? 'Verifying...' : 'Unlock CorePack'}
-        </button>
-        
-        {unlockError && (
-          <button 
-            onClick={() => {
-              useAuthStore.getState().logout();
-              window.location.href = '/login';
-            }} 
-            className="mt-4 text-xs text-slate-500 hover:text-slate-300 underline"
-          >
-            Force Logout
-          </button>
-        )}
-      </div>
-    );
-  }
 
   return (
     <SmoothScrollProvider>

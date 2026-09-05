@@ -127,16 +127,46 @@ export default function ReportsPage() {
   const summary = salesReport?.summary || {};
   const prevSummary = prevSalesReport?.summary || {};
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
   const handleExportPDF = async () => {
     if (Capacitor.isNativePlatform()) {
-      // In a real native PDF flow, we would generate a PDF blob and write it via Filesystem.
-      // Since window.print() is used for web, we will alert the user for now 
-      // or ideally use @capacitor-community/printer. But we are setting up generic Share below.
-      showAlert({
-        title: 'Native Print',
-        message: 'Printing native PDFs requires printer plugins. Use Web view or Excel export for data.',
-        variant: 'info'
-      });
+      try {
+        setIsPrinting(true);
+        // Build the correct API URL for report PDF
+        const res = await api.get(`/reports/download-pdf`, {
+          params: { month: selectedDate.month, year: selectedDate.year },
+          responseType: 'blob' 
+        });
+      
+        const reader = new FileReader();
+        reader.readAsDataURL(res.data);
+        reader.onloadend = async () => {
+          const base64data = reader.result;
+          const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
+          const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
+          
+          const savedFile = await Filesystem.writeFile({
+            path: fileName,
+            data: base64data,
+            directory: Directory.Cache
+          });
+          
+          await Share.share({
+            title: 'Business Report',
+            url: savedFile.uri,
+          });
+          setIsPrinting(false);
+        };
+      } catch (error) {
+        console.error('Native print error:', error);
+        setIsPrinting(false);
+        showAlert({
+          title: 'Print Error',
+          message: 'Failed to prepare report for printing.',
+          variant: 'danger'
+        });
+      }
       return;
     }
     window.print();

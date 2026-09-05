@@ -79,7 +79,8 @@ export default function InvoicesPage() {
       </Card>
 
       <Card className="p-0 overflow-hidden border-slate-200/80">
-        <div className="overflow-x-auto">
+        {/* Desktop View */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -136,6 +137,50 @@ export default function InvoicesPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="sm:hidden flex flex-col gap-3 p-3">
+          {isLoading ? (
+            <div className="p-6 text-center text-slate-400 font-medium text-xs">Loading invoices...</div>
+          ) : invoices.length === 0 ? (
+            <div className="p-6 text-center text-slate-400 font-medium text-xs">No invoices found.</div>
+          ) : (
+            invoices.map((inv) => (
+              <div key={inv._id} className="border border-slate-100 rounded-xl p-3.5 space-y-3 bg-slate-50/50">
+                <div className="flex justify-between items-center">
+                  <Link href={`/invoices/${inv._id}`} className="font-mono font-semibold text-orange-600 text-sm">
+                    {inv.invoiceNumber}
+                  </Link>
+                  <Badge variant={inv.paymentStatus === 'Paid' ? 'success' : inv.paymentStatus === 'Partial' ? 'warning' : 'danger'}>
+                    {inv.paymentStatus}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900 text-sm">
+                    {inv.customerSnapshot?.companyName || inv.customerSnapshot?.name}
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">
+                    GST: {inv.customerSnapshot?.gstin || 'Unregistered'}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-slate-900 text-sm">{formatCurrency(inv.grandTotal)}</span>
+                    <span className="text-xs text-slate-500">{formatDate(inv.invoiceDate)}</span>
+                  </div>
+                  <div className="flex space-x-2 mt-2">
+                    <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={() => setPreviewModal({ isOpen: true, type: 'invoice', id: inv._id })}>
+                      <Eye className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-7 text-xs px-2 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => handleDelete(inv._id, inv.invoiceNumber)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Card>
 

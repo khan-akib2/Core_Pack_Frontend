@@ -11,6 +11,8 @@ import { WhatsAppDocumentModal } from '@/components/ui/WhatsAppDocumentModal';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
@@ -43,13 +45,41 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
     enabled: isOpen
   });
 
-  const handlePrint = () => {
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrint = async () => {
     if (Capacitor.isNativePlatform()) {
-      showAlert({
-        title: 'Native Print',
-        message: 'Direct printing is not supported natively. Please use the WhatsApp or Email options, or print from the Web Dashboard.',
-        variant: 'info'
-      });
+      try {
+        setIsPrinting(true);
+        const res = await api.get(`${endpointMap[type]}/download/${type}`, { responseType: 'blob' });
+      
+        const reader = new FileReader();
+        reader.readAsDataURL(res.data);
+        reader.onloadend = async () => {
+          const base64data = reader.result;
+          const fileName = `${docProps.title.replace(/\s+/g, '_')}.pdf`;
+          
+          const savedFile = await Filesystem.writeFile({
+            path: fileName,
+            data: base64data,
+            directory: Directory.Cache
+          });
+          
+          await Share.share({
+            title: docProps.title,
+            url: savedFile.uri,
+          });
+          setIsPrinting(false);
+        };
+      } catch (error) {
+        console.error('Native print error:', error);
+        setIsPrinting(false);
+        showAlert({
+          title: 'Print Error',
+          message: 'Failed to prepare document for printing.',
+          variant: 'danger'
+        });
+      }
       return;
     }
     window.print();
@@ -108,13 +138,13 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
     <>
     <AnimatePresence>
       {isOpen && (
-      <div key="modal-wrapper" className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 print:hidden">
+      <div key="modal-wrapper" className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 print:p-0">
         <motion.div
           key="backdrop"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm print:hidden"
           onClick={onClose}
         />
         <motion.div
@@ -122,7 +152,7 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
+          className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 print:shadow-none print:border-none print:max-h-none print:rounded-none"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50 shrink-0">
@@ -146,9 +176,23 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
             @media (min-width: 640px) { .preview-zoom { transform: scale(0.75); margin-bottom: -280px; } }
             @media (min-width: 768px) { .preview-zoom { transform: scale(0.85); margin-bottom: -168px; } }
             @media (min-width: 1024px) { .preview-zoom { transform: scale(0.95); margin-bottom: -56px; } }
+            @media print {
+              body * { visibility: hidden; }
+              .preview-zoom, .preview-zoom * { visibility: visible; }
+              .preview-zoom {
+                position: absolute;
+                left: 0;
+                top: 0;
+                transform: none !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+              }
+              .print\\:hidden { display: none !important; }
+            }
           `}</style>
           {/* Document Body */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-200/50 p-2 sm:p-6 flex justify-center items-start">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-200/50 p-2 sm:p-6 flex justify-center items-start print:bg-white print:p-0 print:overflow-visible">
             {isLoading || !company ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -181,8 +225,12 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
               <Button variant="outline" onClick={() => setIsEmailOpen(true)} className="w-full sm:w-auto text-indigo-600 border-indigo-200 hover:bg-indigo-50" disabled={!document}>
                 <Mail className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Email</span>
               </Button>
-              <Button variant="outline" onClick={handlePrint} className="col-span-2 sm:col-span-1 w-full sm:w-auto" disabled={!document}>
-                <Printer className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Print</span>
+              <Button variant="outline" onClick={handlePrint} className="col-span-2 sm:col-span-1 w-full sm:w-auto" disabled={!document || isPrinting}>
+                {isPrinting ? (
+                  <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin sm:mr-2"></div> <span className="hidden sm:inline">Preparing...</span></>
+                ) : (
+                  <><Printer className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Print</span></>
+                )}
               </Button>
             </div>
             {docProps.detailsLink && (
