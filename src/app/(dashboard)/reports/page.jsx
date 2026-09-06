@@ -136,28 +136,31 @@ export default function ReportsPage() {
         // Build the correct API URL for report PDF
         const res = await api.get(`/reports/download-pdf`, {
           params: { month: selectedDate.month, year: selectedDate.year },
-          responseType: 'blob' 
+          responseType: 'arraybuffer' 
         });
       
-        const reader = new FileReader();
-        reader.readAsDataURL(res.data);
-        reader.onloadend = async () => {
-          const base64data = reader.result;
-          const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
-          const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
-          
-          const savedFile = await Filesystem.writeFile({
-            path: fileName,
-            data: base64data,
-            directory: Directory.Cache
-          });
-          
-          await Share.share({
-            title: 'Business Report',
-            url: savedFile.uri,
-          });
-          setIsPrinting(false);
-        };
+        let binary = '';
+        const bytes = new Uint8Array(res.data);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        const base64data = `data:application/pdf;base64,${window.btoa(binary)}`;
+        
+        const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
+        const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
+        
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64data,
+          directory: Directory.Cache
+        });
+        
+        await Share.share({
+          title: 'Business Report',
+          url: savedFile.uri,
+        });
+        setIsPrinting(false);
       } catch (error) {
         console.error('Native print error:', error);
         setIsPrinting(false);

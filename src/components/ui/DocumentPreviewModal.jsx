@@ -51,26 +51,29 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
     if (Capacitor.isNativePlatform()) {
       try {
         setIsPrinting(true);
-        const res = await api.get(`${endpointMap[type]}/download/${type}`, { responseType: 'blob' });
+        const res = await api.get(`${endpointMap[type]}/download/${type}`, { responseType: 'arraybuffer' });
       
-        const reader = new FileReader();
-        reader.readAsDataURL(res.data);
-        reader.onloadend = async () => {
-          const base64data = reader.result;
-          const fileName = `${docProps.title.replace(/\s+/g, '_')}.pdf`;
+        let binary = '';
+        const bytes = new Uint8Array(res.data);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        const base64data = `data:application/pdf;base64,${window.btoa(binary)}`;
+        
+        const fileName = `${docProps.title.replace(/\s+/g, '_')}.pdf`;
           
-          const savedFile = await Filesystem.writeFile({
-            path: fileName,
-            data: base64data,
-            directory: Directory.Cache
-          });
-          
-          await Share.share({
-            title: docProps.title,
-            url: savedFile.uri,
-          });
-          setIsPrinting(false);
-        };
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64data,
+          directory: Directory.Cache
+        });
+        
+        await Share.share({
+          title: docProps.title,
+          url: savedFile.uri,
+        });
+        setIsPrinting(false);
       } catch (error) {
         console.error('Native print error:', error);
         setIsPrinting(false);

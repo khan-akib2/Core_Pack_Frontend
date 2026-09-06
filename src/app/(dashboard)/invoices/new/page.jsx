@@ -40,13 +40,13 @@ export default function NewInvoicePage() {
     }
   });
 
-  const nextInvoiceNo = counterData?.nextNumber || '001';
+  const nextInvoiceNo = counterData?.nextNumber || '';
 
   useEffect(() => {
-    if (nextInvoiceNo && !customInvoiceNumber) {
+    if (nextInvoiceNo && !customInvoiceNumber && counterData) {
       setCustomInvoiceNumber(nextInvoiceNo);
     }
-  }, [nextInvoiceNo]);
+  }, [nextInvoiceNo, counterData]);
 
   const { data: customers } = useQuery({
     queryKey: ['customersList'],
