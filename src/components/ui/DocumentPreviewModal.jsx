@@ -51,53 +51,32 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
     if (Capacitor.isNativePlatform()) {
       try {
         setIsPrinting(true);
-        const res = await api.get(`${endpointMap[type]}/download/${type}`, { responseType: 'arraybuffer' });
+        const res = await api.get(`${endpointMap[type]}/download/${type}?format=base64`);
       
-        const blob = new Blob([res.data], { type: 'application/pdf' });
-        const reader = new FileReader();
+        if (!res.data || !res.data.base64) {
+          throw new Error("Missing base64 data from server");
+        }
         
-        reader.onloadend = async () => {
-          try {
-            const base64data = reader.result;
-            // Filesystem.writeFile expects pure base64 without the data URI prefix
-            const pureBase64 = base64data.split(',')[1];
-            
-            const fileName = `${docProps.title.replace(/\\s+/g, '_')}.pdf`;
-              
-            const savedFile = await Filesystem.writeFile({
-              path: fileName,
-              data: pureBase64,
-              directory: Directory.Cache
-            });
-            
-            await Share.share({
-              title: docProps.title,
-              url: savedFile.uri,
-            });
-            setIsPrinting(false);
-          } catch (error) {
-            console.error('Native print error during write/share:', error);
-            setIsPrinting(false);
-            showAlert({
-              title: 'Print Error',
-              message: 'Failed to prepare document for printing.',
-              variant: 'danger'
-            });
-          }
-        };
-        reader.onerror = () => {
-          console.error('FileReader error');
-          setIsPrinting(false);
-          showAlert({ title: 'Print Error', message: 'Failed to read document data.', variant: 'danger' });
-        };
+        const pureBase64 = res.data.base64;
+        const fileName = `${docProps.title.replace(/\\s+/g, '_')}.pdf`;
+          
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: pureBase64,
+          directory: Directory.Cache
+        });
         
-        reader.readAsDataURL(blob);
+        await Share.share({
+          title: docProps.title,
+          url: savedFile.uri,
+        });
+        setIsPrinting(false);
       } catch (error) {
-        console.error('Native print error during fetch:', error);
+        console.error('Native print error during fetch/write/share:', error);
         setIsPrinting(false);
         showAlert({
           title: 'Print Error',
-          message: 'Failed to download document for printing.',
+          message: 'Failed to download or prepare document for printing.',
           variant: 'danger'
         });
       }

@@ -133,59 +133,34 @@ export default function ReportsPage() {
     if (Capacitor.isNativePlatform()) {
       try {
         setIsPrinting(true);
-        // Build the correct API URL for report PDF
-        const res = await api.get(`/reports/download-pdf`, {
-          params: { month: selectedDate.month, year: selectedDate.year },
-          responseType: 'arraybuffer' 
+        const res = await api.get('/reports/download-pdf', {
+          params: { month: selectedDate.month, year: selectedDate.year, format: 'base64' }
         });
-      
-        const blob = new Blob([res.data], { type: 'application/pdf' });
-        const reader = new FileReader();
         
-        reader.onloadend = async () => {
-          try {
-            const base64data = reader.result;
-            const pureBase64 = base64data.split(',')[1];
-            
-            const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
-            const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
-            
-            const savedFile = await Filesystem.writeFile({
-              path: fileName,
-              data: pureBase64,
-              directory: Directory.Cache
-            });
-            
-            await Share.share({
-              title: 'Business Report',
-              url: savedFile.uri,
-            });
-            setIsPrinting(false);
-          } catch (error) {
-            console.error('Native print error during write/share:', error);
-            setIsPrinting(false);
-            showAlert({
-              title: 'Print Error',
-              message: 'Failed to prepare report for printing.',
-              variant: 'danger'
-            });
-          }
-        };
-        reader.onerror = () => {
-          console.error('FileReader error');
-          setIsPrinting(false);
-          showAlert({ title: 'Print Error', message: 'Failed to read report data.', variant: 'danger' });
-        };
+        if (!res.data || !res.data.base64) {
+          throw new Error("Missing base64 data from server");
+        }
         
-        reader.readAsDataURL(blob);
-      } catch (error) {
-        console.error('Native print error during fetch:', error);
+        const pureBase64 = res.data.base64;
+        const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
+        const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
+
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: pureBase64,
+          directory: Directory.Cache
+        });
+
+        await Share.share({
+          title: 'Business Report',
+          url: savedFile.uri,
+        });
+
         setIsPrinting(false);
-        showAlert({
-          title: 'Print Error',
-          message: 'Failed to download report for printing.',
-          variant: 'danger'
-        });
+      } catch (error) {
+        console.error('Native report print error:', error);
+        setIsPrinting(false);
+        showAlert({ title: 'Print Error', message: 'Failed to prepare report for printing.', variant: 'danger' });
       }
       return;
     }
