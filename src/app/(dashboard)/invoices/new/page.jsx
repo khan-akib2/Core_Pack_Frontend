@@ -148,7 +148,7 @@ export default function NewInvoicePage() {
 
     createInvoiceMutation.mutate({
       customerId,
-      customInvoiceNumber: customInvoiceNumber || nextInvoiceNo,
+      customInvoiceNumber: (customInvoiceNumber && customInvoiceNumber !== nextInvoiceNo) ? customInvoiceNumber : undefined,
       invoiceDate,
       challanNumber,
       challanDate,

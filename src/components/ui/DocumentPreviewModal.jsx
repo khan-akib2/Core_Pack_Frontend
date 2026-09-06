@@ -53,33 +53,51 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
         setIsPrinting(true);
         const res = await api.get(`${endpointMap[type]}/download/${type}`, { responseType: 'arraybuffer' });
       
-        let binary = '';
-        const bytes = new Uint8Array(res.data);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        const base64data = `data:application/pdf;base64,${window.btoa(binary)}`;
+        const blob = new Blob([res.data], { type: 'application/pdf' });
+        const reader = new FileReader();
         
-        const fileName = `${docProps.title.replace(/\s+/g, '_')}.pdf`;
-          
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: base64data,
-          directory: Directory.Cache
-        });
+        reader.onloadend = async () => {
+          try {
+            const base64data = reader.result;
+            // Filesystem.writeFile expects pure base64 without the data URI prefix
+            const pureBase64 = base64data.split(',')[1];
+            
+            const fileName = `${docProps.title.replace(/\\s+/g, '_')}.pdf`;
+              
+            const savedFile = await Filesystem.writeFile({
+              path: fileName,
+              data: pureBase64,
+              directory: Directory.Cache
+            });
+            
+            await Share.share({
+              title: docProps.title,
+              url: savedFile.uri,
+            });
+            setIsPrinting(false);
+          } catch (error) {
+            console.error('Native print error during write/share:', error);
+            setIsPrinting(false);
+            showAlert({
+              title: 'Print Error',
+              message: 'Failed to prepare document for printing.',
+              variant: 'danger'
+            });
+          }
+        };
+        reader.onerror = () => {
+          console.error('FileReader error');
+          setIsPrinting(false);
+          showAlert({ title: 'Print Error', message: 'Failed to read document data.', variant: 'danger' });
+        };
         
-        await Share.share({
-          title: docProps.title,
-          url: savedFile.uri,
-        });
-        setIsPrinting(false);
+        reader.readAsDataURL(blob);
       } catch (error) {
-        console.error('Native print error:', error);
+        console.error('Native print error during fetch:', error);
         setIsPrinting(false);
         showAlert({
           title: 'Print Error',
-          message: 'Failed to prepare document for printing.',
+          message: 'Failed to download document for printing.',
           variant: 'danger'
         });
       }

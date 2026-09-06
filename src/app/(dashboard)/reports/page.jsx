@@ -139,34 +139,51 @@ export default function ReportsPage() {
           responseType: 'arraybuffer' 
         });
       
-        let binary = '';
-        const bytes = new Uint8Array(res.data);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        const base64data = `data:application/pdf;base64,${window.btoa(binary)}`;
+        const blob = new Blob([res.data], { type: 'application/pdf' });
+        const reader = new FileReader();
         
-        const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
-        const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
+        reader.onloadend = async () => {
+          try {
+            const base64data = reader.result;
+            const pureBase64 = base64data.split(',')[1];
+            
+            const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
+            const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
+            
+            const savedFile = await Filesystem.writeFile({
+              path: fileName,
+              data: pureBase64,
+              directory: Directory.Cache
+            });
+            
+            await Share.share({
+              title: 'Business Report',
+              url: savedFile.uri,
+            });
+            setIsPrinting(false);
+          } catch (error) {
+            console.error('Native print error during write/share:', error);
+            setIsPrinting(false);
+            showAlert({
+              title: 'Print Error',
+              message: 'Failed to prepare report for printing.',
+              variant: 'danger'
+            });
+          }
+        };
+        reader.onerror = () => {
+          console.error('FileReader error');
+          setIsPrinting(false);
+          showAlert({ title: 'Print Error', message: 'Failed to read report data.', variant: 'danger' });
+        };
         
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: base64data,
-          directory: Directory.Cache
-        });
-        
-        await Share.share({
-          title: 'Business Report',
-          url: savedFile.uri,
-        });
-        setIsPrinting(false);
+        reader.readAsDataURL(blob);
       } catch (error) {
-        console.error('Native print error:', error);
+        console.error('Native print error during fetch:', error);
         setIsPrinting(false);
         showAlert({
           title: 'Print Error',
-          message: 'Failed to prepare report for printing.',
+          message: 'Failed to download report for printing.',
           variant: 'danger'
         });
       }
