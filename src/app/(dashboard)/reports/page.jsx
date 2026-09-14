@@ -13,6 +13,7 @@ import { ReportPrintable } from '@/components/printable/ReportPrintable';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { printOrDownloadDocument } from '@/lib/pdfUtils';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 // Helper to calculate start/end dates for a given month/year
@@ -130,42 +131,22 @@ export default function ReportsPage() {
   const [isPrinting, setIsPrinting] = useState(false);
 
   const handleExportPDF = async () => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        setIsPrinting(true);
-        const res = await api.get('/reports/download-pdf', {
-          params: { month: selectedDate.month, year: selectedDate.year, format: 'base64' }
-        });
-        
-        if (!res.data || !res.data.base64) {
-          throw new Error("Missing base64 data from server");
-        }
-        
-        const pureBase64 = res.data.base64;
-        const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
-        const fileName = `Report_${monthName}_${selectedDate.year}.pdf`;
-
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: pureBase64,
-          directory: Directory.Cache
-        });
-
-        await Share.share({
-          title: 'Business Report',
-          files: [savedFile.uri],
-          dialogTitle: 'Print or Share Report'
-        });
-
-        setIsPrinting(false);
-      } catch (error) {
-        console.error('Native report print error:', error);
-        setIsPrinting(false);
-        showAlert({ title: 'Print Error', message: 'Failed to prepare report for printing.', variant: 'danger' });
-      }
-      return;
+    try {
+      setIsPrinting(true);
+      const monthName = new Date(selectedDate.year, selectedDate.month).toLocaleString('default', { month: 'short' });
+      await printOrDownloadDocument({
+        type: 'reports',
+        documentId: 'sales',
+        title: `Report_${monthName}_${selectedDate.year}`,
+        elementQuery: '.printable-document',
+        fallbackEndpoint: `/reports/download-pdf?month=${selectedDate.month + 1}&year=${selectedDate.year}&format=base64`
+      });
+    } catch (error) {
+      console.error('Report export error:', error);
+      showAlert({ title: 'Print Error', message: 'Failed to prepare report for printing.', variant: 'danger' });
+    } finally {
+      setIsPrinting(false);
     }
-    window.print();
   };
 
   const handleExportExcel = async () => {

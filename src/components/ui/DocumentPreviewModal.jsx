@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { printOrDownloadDocument } from '@/lib/pdfUtils';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
@@ -48,42 +49,25 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
   const [isPrinting, setIsPrinting] = useState(false);
 
   const handlePrint = async () => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        setIsPrinting(true);
-        const res = await api.get(`${endpointMap[type]}/download/${type}?format=base64`);
-      
-        if (!res.data || !res.data.base64) {
-          throw new Error("Missing base64 data from server");
-        }
-        
-        const pureBase64 = res.data.base64;
-        const fileName = `${docProps.title.replace(/\\s+/g, '_')}.pdf`;
-          
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: pureBase64,
-          directory: Directory.Cache
-        });
-        
-        await Share.share({
-          title: docProps.title || 'Document',
-          files: [savedFile.uri],
-          dialogTitle: 'Print or Share Document'
-        });
-        setIsPrinting(false);
-      } catch (error) {
-        console.error('Native print error during fetch/write/share:', error);
-        setIsPrinting(false);
-        showAlert({
-          title: 'Print Error',
-          message: 'Failed to download or prepare document for printing.',
-          variant: 'danger'
-        });
-      }
-      return;
+    try {
+      setIsPrinting(true);
+      const docProps = getDocProps();
+      await printOrDownloadDocument({
+        type,
+        documentId,
+        title: docProps.title,
+        elementQuery: '.printable-document'
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+      showAlert({
+        title: 'Print Error',
+        message: 'Failed to prepare document for printing.',
+        variant: 'danger'
+      });
+    } finally {
+      setIsPrinting(false);
     }
-    window.print();
   };
 
   const getDocProps = () => {

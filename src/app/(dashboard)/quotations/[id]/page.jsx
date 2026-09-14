@@ -9,9 +9,7 @@ import { QuotationPrintable } from '@/components/printable/QuotationPrintable';
 import { EmailDocumentModal } from '@/components/ui/EmailDocumentModal';
 import { WhatsAppDocumentModal } from '@/components/ui/WhatsAppDocumentModal';
 import { Printer, ArrowLeft, Pencil, Mail, MessageCircle } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
-import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Share } from '@capacitor/share';
+import { printOrDownloadDocument } from '@/lib/pdfUtils';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function QuotationDetailPage() {
@@ -37,28 +35,17 @@ export default function QuotationDetailPage() {
   });
 
   const handlePrint = async () => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const res = await api.get(`/quotations/${id}/download/quotation?format=base64`);
-        if (!res.data || !res.data.base64) throw new Error("Missing PDF base64 data");
-        const fileName = `Quotation_${quotation?.quoteNumber || id}.pdf`;
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: res.data.base64,
-          directory: Directory.Cache
-        });
-        await Share.share({
-          title: `Quotation ${quotation?.quoteNumber || id}`,
-          files: [savedFile.uri],
-          dialogTitle: 'Print or Share Quotation'
-        });
-      } catch (err) {
-        console.error('Native print error:', err);
-        showAlert({ title: 'Print Error', message: 'Failed to prepare quotation for printing.', variant: 'danger' });
-      }
-      return;
+    try {
+      await printOrDownloadDocument({
+        type: 'quotation',
+        documentId: id,
+        title: `Quotation ${quotation?.quoteNumber || id}`,
+        elementQuery: '.printable-document'
+      });
+    } catch (err) {
+      console.error('Print error:', err);
+      showAlert({ title: 'Print Error', message: 'Failed to prepare quotation for printing.', variant: 'danger' });
     }
-    window.print();
   };
 
   if (isLoading) return <p className="text-slate-400 p-8 text-center">Loading Quotation details...</p>;
