@@ -153,7 +153,8 @@ export default function ReportsPage() {
 
         await Share.share({
           title: 'Business Report',
-          url: savedFile.uri,
+          files: [savedFile.uri],
+          dialogTitle: 'Print or Share Report'
         });
 
         setIsPrinting(false);
@@ -208,7 +209,7 @@ export default function ReportsPage() {
         await Share.share({
           title: fileName,
           text: 'Here is the exported GSTR1 Sales Report.',
-          url: result.uri,
+          files: [result.uri],
           dialogTitle: 'Save or Share Excel Report'
         });
       } catch (err) {

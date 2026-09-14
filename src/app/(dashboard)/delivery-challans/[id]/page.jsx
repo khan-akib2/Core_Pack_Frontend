@@ -9,9 +9,13 @@ import { ChallanPrintable } from '@/components/printable/ChallanPrintable';
 import { EmailDocumentModal } from '@/components/ui/EmailDocumentModal';
 import { WhatsAppDocumentModal } from '@/components/ui/WhatsAppDocumentModal';
 import { Printer, ArrowLeft, Pencil, Mail, MessageCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function ChallanDetailPage() {
+  const { showAlert } = useCustomModal();
   const { id } = useParams();
   const [isEmailModalOpen, setIsEmailModalOpen] = React.useState(false);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = React.useState(false);
@@ -32,7 +36,28 @@ export default function ChallanDetailPage() {
     }
   });
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const res = await api.get(`/challans/${id}/download/challan?format=base64`);
+        if (!res.data || !res.data.base64) throw new Error("Missing PDF base64 data");
+        const fileName = `Challan_${challan?.challanNumber || id}.pdf`;
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: res.data.base64,
+          directory: Directory.Cache
+        });
+        await Share.share({
+          title: `Challan ${challan?.challanNumber || id}`,
+          files: [savedFile.uri],
+          dialogTitle: 'Print or Share Delivery Challan'
+        });
+      } catch (err) {
+        console.error('Native print error:', err);
+        showAlert({ title: 'Print Error', message: 'Failed to prepare challan for printing.', variant: 'danger' });
+      }
+      return;
+    }
     window.print();
   };
 

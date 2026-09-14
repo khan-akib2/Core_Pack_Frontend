@@ -14,6 +14,9 @@ import { InvoicePrintable } from '@/components/printable/InvoicePrintable';
 import { Printer, ArrowLeft, CreditCard, Pencil, Mail, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function InvoiceDetailPage() {
@@ -62,7 +65,28 @@ export default function InvoiceDetailPage() {
     }
   });
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const res = await api.get(`/invoices/${id}/download/invoice?format=base64`);
+        if (!res.data || !res.data.base64) throw new Error("Missing PDF base64 data");
+        const fileName = `Invoice_${invoice?.invoiceNumber || id}.pdf`;
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: res.data.base64,
+          directory: Directory.Cache
+        });
+        await Share.share({
+          title: `Invoice ${invoice?.invoiceNumber || id}`,
+          files: [savedFile.uri],
+          dialogTitle: 'Print or Share Invoice'
+        });
+      } catch (err) {
+        console.error('Native print error:', err);
+        showAlert({ title: 'Print Error', message: 'Failed to prepare invoice for printing.', variant: 'danger' });
+      }
+      return;
+    }
     window.print();
   };
 

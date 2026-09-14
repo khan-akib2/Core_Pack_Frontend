@@ -34,16 +34,16 @@ const processQueue = (error, token = null) => {
 };
 
 api.interceptors.request.use((config) => {
-  // Use in-memory token from Zustand store
-  const token = useAuthStore.getState().token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  } else if (typeof window !== 'undefined') {
-    // Fallback: cleanup old insecure tokens if they exist during migration
-    const oldToken = localStorage.getItem('cp_access_token');
-    if (oldToken) {
-      config.headers.Authorization = `Bearer ${oldToken}`;
-      // Let it pass for now, we'll migrate them silently or force them to re-login if it expires
+  if (!config.headers.Authorization) {
+    // Use in-memory token from Zustand store
+    const token = useAuthStore.getState().token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else if (typeof window !== 'undefined') {
+      const oldToken = localStorage.getItem('cp_access_token');
+      if (oldToken) {
+        config.headers.Authorization = `Bearer ${oldToken}`;
+      }
     }
   }
   return config;

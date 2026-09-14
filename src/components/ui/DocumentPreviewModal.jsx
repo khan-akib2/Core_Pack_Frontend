@@ -67,8 +67,9 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
         });
         
         await Share.share({
-          title: docProps.title,
-          url: savedFile.uri,
+          title: docProps.title || 'Document',
+          files: [savedFile.uri],
+          dialogTitle: 'Print or Share Document'
         });
         setIsPrinting(false);
       } catch (error) {
