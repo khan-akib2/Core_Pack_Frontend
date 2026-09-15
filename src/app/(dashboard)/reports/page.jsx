@@ -142,8 +142,11 @@ export default function ReportsPage() {
         fallbackEndpoint: `/reports/download-pdf?month=${selectedDate.month + 1}&year=${selectedDate.year}&format=base64`
       });
     } catch (error) {
-      console.error('Report export error:', error);
-      showAlert({ title: 'Print Error', message: 'Failed to prepare report for printing.', variant: 'danger' });
+      const msg = typeof error === 'string' ? error : (error?.message || String(error));
+      if (!/cancel|canceled|cancelled|dismissed/i.test(msg)) {
+        console.error('Report export error:', error);
+        showAlert({ title: 'Print Error', message: 'Failed to prepare report for printing.', variant: 'danger' });
+      }
     } finally {
       setIsPrinting(false);
     }
@@ -194,8 +197,13 @@ export default function ReportsPage() {
           dialogTitle: 'Save or Share Excel Report'
         });
       } catch (err) {
-        console.error('File export error:', err);
-        showAlert({ title: 'Export Failed', message: 'Could not export Excel file on device.', variant: 'danger' });
+        const msg = typeof err === 'string' ? err : (err?.message || String(err));
+        if (!/cancel|canceled|cancelled|dismissed/i.test(msg)) {
+          console.error('File export error:', err);
+          showAlert({ title: 'Export Failed', message: 'Could not export Excel file on device.', variant: 'danger' });
+        } else {
+          console.log('[reports] Excel share/export cancelled by user');
+        }
       }
     } else {
       XLSX.writeFile(wb, fileName);

@@ -44,8 +44,11 @@ export default function ChallanDetailPage() {
         elementQuery: '.printable-document'
       });
     } catch (err) {
-      console.error('Print error:', err);
-      showAlert({ title: 'Print Error', message: 'Failed to prepare challan for printing.', variant: 'danger' });
+      const msg = typeof err === 'string' ? err : (err?.message || String(err));
+      if (!/cancel|canceled|cancelled|dismissed/i.test(msg)) {
+        console.error('Print error:', err);
+        showAlert({ title: 'Print Error', message: 'Failed to prepare challan for printing.', variant: 'danger' });
+      }
     }
   };
 

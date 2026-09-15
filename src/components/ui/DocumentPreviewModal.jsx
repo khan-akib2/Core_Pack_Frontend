@@ -59,12 +59,15 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
         elementQuery: '.printable-document'
       });
     } catch (error) {
-      console.error('Print error:', error);
-      showAlert({
-        title: 'Print Error',
-        message: 'Failed to prepare document for printing.',
-        variant: 'danger'
-      });
+      const msg = typeof error === 'string' ? error : (error?.message || String(error));
+      if (!/cancel|canceled|cancelled|dismissed/i.test(msg)) {
+        console.error('Print error:', error);
+        showAlert({
+          title: 'Print Error',
+          message: 'Failed to prepare document for printing.',
+          variant: 'danger'
+        });
+      }
     } finally {
       setIsPrinting(false);
     }

@@ -335,11 +335,20 @@ export async function printOrDownloadDocument({ type, documentId, title, element
 
     const printHtml = await buildPrintHtml(element);
 
-    // Invoke Android native PrintManager via @capgo/capacitor-printer
-    await Printer.printHtml({
-      name: safeTitle,
-      html: printHtml
-    });
+    try {
+      // Invoke Android native PrintManager via @capgo/capacitor-printer
+      await Printer.printHtml({
+        name: safeTitle,
+        html: printHtml
+      });
+    } catch (err) {
+      const msg = typeof err === 'string' ? err : (err?.message || String(err));
+      if (/cancel|canceled|cancelled|dismissed/i.test(msg)) {
+        console.log('[pdfUtils] Print job cancelled by user');
+        return false;
+      }
+      throw err;
+    }
 
     return true;
   }
