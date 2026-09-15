@@ -48,6 +48,58 @@ export async function generatePdfFromElement(element, filename = 'document.pdf')
   // Remove utility classes that hide or offset elements
   clone.classList.remove('fixed', '-left-[9999px]', 'opacity-0', '-z-50', 'hidden');
 
+  // 3. Normalize cloned DOM elements specifically for html2canvas rendering compatibility
+  // A. Logo normalization (prevents html2canvas image stretch & transform scale distortion)
+  const logoImg = clone.querySelector('img[src*="logo.png"]');
+  if (logoImg) {
+    logoImg.style.maxHeight = '88px';
+    logoImg.style.maxWidth = '280px';
+    logoImg.style.width = 'auto';
+    logoImg.style.height = 'auto';
+    logoImg.style.transform = 'none';
+    logoImg.style.objectFit = 'contain';
+    logoImg.style.objectPosition = 'center';
+    logoImg.style.display = 'block';
+    logoImg.style.margin = '0 auto';
+  }
+
+  // B. Contact Panel & Header height normalization (prevents header height expansion beyond 105px)
+  const allDivs = clone.querySelectorAll('div');
+  allDivs.forEach(div => {
+    if (div.style && div.style.width === '380px') {
+      div.style.padding = '6px 20px 6px 40px';
+      div.style.gap = '4px';
+      const spans = div.querySelectorAll('span');
+      spans.forEach(span => {
+        if (span.style.fontSize === '9px') span.style.fontSize = '8.5px';
+        if (span.style.fontSize === '10.5px') span.style.fontSize = '9.5px';
+        if (span.style.fontSize === '11px') span.style.fontSize = '10px';
+        if (span.style.lineHeight) span.style.lineHeight = '1.25';
+      });
+    }
+    if (div.style && (div.style.minHeight === '105px' || div.style.minHeight === '105px')) {
+      div.style.height = '105px';
+      div.style.maxHeight = '105px';
+      div.style.overflow = 'hidden';
+    }
+    // C. Bottom-right border triangle replacement on clone (prevents 852px width miscalculation in html2canvas)
+    if (div.style && div.style.borderWidth && div.style.borderWidth.includes('58px')) {
+      const svgTri = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgTri.setAttribute('width', '58');
+      svgTri.setAttribute('height', '58');
+      svgTri.setAttribute('viewBox', '0 0 58 58');
+      svgTri.style.position = 'absolute';
+      svgTri.style.bottom = '0';
+      svgTri.style.right = '0';
+      svgTri.style.pointerEvents = 'none';
+      svgTri.style.zIndex = '20';
+      svgTri.innerHTML = '<polygon points="58,0 58,58 0,58" fill="#F26522" />';
+      if (div.parentNode) {
+        div.parentNode.replaceChild(svgTri, div);
+      }
+    }
+  });
+
   container.appendChild(clone);
   document.body.appendChild(container);
 
