@@ -16,6 +16,7 @@ import {
   FileCode,
   Bell,
   Database,
+  Banknote,
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Notifications', href: '/notifications', icon: Bell, showBadge: true },
   { name: 'Tax Invoices', href: '/invoices', icon: FileText },
+  { name: 'Pending Payments', href: '/pending-payments', icon: Banknote },
   { name: 'Quotations', href: '/quotations', icon: FileCode },
   { name: 'Delivery Challans', href: '/delivery-challans', icon: Truck },
   { name: 'Product Catalog', href: '/products', icon: Package },

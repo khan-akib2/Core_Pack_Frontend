@@ -97,16 +97,21 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Outstanding Receivables</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.outstandingAmountTotal)}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-rose-500">
-            <AlertCircle className="w-4 h-4" />
-            <span>{summary.totalInvoicesCount || 0} active invoice accounts</span>
-          </div>
-        </Card>
+        <Link href="/pending-payments" className="block outline-none">
+          <Card className="p-5 flex flex-col justify-between h-full hover:border-rose-300 transition-colors cursor-pointer group">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-rose-600 transition-colors">Outstanding Receivables</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.outstandingAmountTotal)}</p>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-xs font-semibold text-rose-500">
+              <div className="flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{summary.totalInvoicesCount || 0} active invoice accounts</span>
+              </div>
+              <ArrowIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </Card>
+        </Link>
       </div>
 
       {/* Dispatches & Delivery Challans Table Section */}
