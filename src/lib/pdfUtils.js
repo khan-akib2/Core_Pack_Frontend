@@ -1,8 +1,5 @@
 import { Capacitor } from '@capacitor/core';
 import { Printer } from '@capgo/capacitor-printer';
-import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Share } from '@capacitor/share';
-import { api } from '@/lib/api';
 
 /**
  * Builds a clean, self-contained HTML document string from a target printable DOM element
@@ -144,83 +141,27 @@ export async function generatePdfFromElement(element, filename = 'document.pdf')
 
 /**
  * Native Android & Web print handler.
- * - On Android Native: Triggers Android PrintManager via @capgo/capacitor-printer
+ * - On Android Native: Triggers Android PrintManager via @capgo/capacitor-printer (Printer.printHtml)
  * - On Web Browser: Invokes standard window.print()
  */
-export async function printOrDownloadDocument({ type, documentId, title, elementQuery = '.printable-document', fallbackEndpoint }) {
+export async function printOrDownloadDocument({ type, documentId, title, elementQuery = '.printable-document' }) {
   if (Capacitor.isNativePlatform()) {
     const safeTitle = (title || `${type}_${documentId}`).replace(/\s+/g, '_');
-
-    // 1. Try native Android PrintManager via @capgo/capacitor-printer
     const element = document.querySelector(elementQuery);
-    if (element) {
-      try {
-        const printHtml = buildPrintHtml(element);
-        await Printer.print({
-          name: safeTitle,
-          html: printHtml
-        });
-        return true;
-      } catch (printErr) {
-        console.warn('[pdfUtils] Native HTML printer error, trying file print fallback:', printErr);
-      }
+
+    if (!element) {
+      throw new Error('Printable document element not found on page');
     }
 
-    // 2. Server PDF / File fallback if native HTML print fails
-    let pureBase64 = null;
-    const fileName = `${safeTitle}.pdf`;
-    const endpointMap = {
-      invoice: `/invoices/${documentId}/download/invoice?format=base64`,
-      quotation: `/quotations/${documentId}/download/quotation?format=base64`,
-      challan: `/challans/${documentId}/download/challan?format=base64`
-    };
-    const url = fallbackEndpoint || endpointMap[type];
+    const printHtml = buildPrintHtml(element);
 
-    if (url) {
-      try {
-        const res = await api.get(url);
-        if (res.data && res.data.base64) {
-          pureBase64 = res.data.base64;
-        }
-      } catch (serverErr) {
-        console.warn('[pdfUtils] Server PDF generation fallback failed:', serverErr);
-      }
-    }
+    // Invoke Android native PrintManager via @capgo/capacitor-printer
+    await Printer.printHtml({
+      name: safeTitle,
+      html: printHtml
+    });
 
-    if (!pureBase64 && element) {
-      pureBase64 = await generatePdfFromElement(element, fileName);
-    }
-
-    if (pureBase64) {
-      const savedFile = await Filesystem.writeFile({
-        path: fileName,
-        data: pureBase64,
-        directory: Directory.Cache
-      });
-
-      try {
-        await Share.share({
-          title: title || 'Document',
-          files: [savedFile.uri],
-          dialogTitle: 'Print or Share Document'
-        });
-        return true;
-      } catch (shareErr) {
-        const msg = String(shareErr?.message || shareErr || '').toLowerCase();
-        if (
-          msg.includes('cancel') ||
-          msg.includes('dismiss') ||
-          msg.includes('user canceled') ||
-          msg.includes('aborted')
-        ) {
-          console.log('[pdfUtils] Share dialog dismissed by user');
-          return false;
-        }
-        throw shareErr;
-      }
-    }
-
-    throw new Error('Failed to open native print dialog');
+    return true;
   }
 
   // Web Browser fallback
