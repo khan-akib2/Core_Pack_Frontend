@@ -155,20 +155,18 @@ export function QuotationPrintable({ quotation, company }) {
         </div>
 
         {/* Content Layer */}
-        <div style={{ display: 'flex', position: 'relative', zIndex: 2, minHeight: '105px' }}>
+        <div style={{ display: 'flex', position: 'relative', zIndex: 2, height: '105px', minHeight: '105px', maxHeight: '105px', overflow: 'hidden' }}>
           {/* LEFT: Logo */}
-          <div style={{ flex: 1, padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <div style={{ flex: 1, padding: '8px 15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img
               src="/branding/logo.png"
               alt="Core Pack India"
               style={{
-                width: '100%',
-                height: '100%',
-                maxHeight: '190px',
-                objectFit: 'contain',
-                objectPosition: '23px',
-                transform: 'scale(1.4)',
-                transformOrigin: 'center center',
+                maxHeight: '88px',
+                maxWidth: '280px',
+                width: 'auto',
+                height: 'auto',
+                display: 'block',
                 mixBlendMode: 'multiply'
               }}
             />
@@ -177,45 +175,45 @@ export function QuotationPrintable({ quotation, company }) {
           {/* RIGHT: Contact */}
           <div style={{
             width: '380px',
-            padding: '10px 25px 10px 45px',
+            padding: '6px 20px 6px 40px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            gap: '8px'
+            gap: '4px'
           }}>
             {/* Address */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <div style={{ marginTop: '2px' }}><IcPin /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Address</span>
-                <span style={{ color: 'white', fontSize: '10.5px', lineHeight: '1.4' }}>{compAddr}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <div style={{ marginTop: '1px' }}><IcPin /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Address</span>
+                <span style={{ color: 'white', fontSize: '9.5px', lineHeight: '1.25' }}>{compAddr}</span>
               </div>
             </div>
 
             {/* Mobile */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <div style={{ marginTop: '2px' }}><IcPhone /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mobile</span>
-                <span style={{ color: 'white', fontSize: '10.5px', lineHeight: '1.4' }}>{company?.phone || '8851000041 / 9324540077'}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <div style={{ marginTop: '1px' }}><IcPhone /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Mobile</span>
+                <span style={{ color: 'white', fontSize: '9.5px', lineHeight: '1.25' }}>{company?.phone || '8851000041 / 9324540077'}</span>
               </div>
             </div>
 
             {/* Email */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <div style={{ marginTop: '2px' }}><IcMail /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</span>
-                <span style={{ color: 'white', fontSize: '10.5px', lineHeight: '1.4' }}>{company?.email || 'corepackindia@gmail.com'}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <div style={{ marginTop: '1px' }}><IcMail /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Email</span>
+                <span style={{ color: 'white', fontSize: '9.5px', lineHeight: '1.25' }}>{company?.email || 'corepackindia@gmail.com'}</span>
               </div>
             </div>
 
             {/* GSTIN */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <div style={{ marginTop: '2px' }}><IcGlobe /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>GSTIN</span>
-                <span style={{ color: 'white', fontSize: '11px', lineHeight: '1.4', fontFamily: 'monospace', fontWeight: '700', letterSpacing: '0.5px' }}>{company?.gstin || '27AMSPK9622Q1ZZ'}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <div style={{ marginTop: '1px' }}><IcGlobe /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>GSTIN</span>
+                <span style={{ color: 'white', fontSize: '10px', lineHeight: '1.25', fontFamily: 'monospace', fontWeight: '700', letterSpacing: '0.5px' }}>{company?.gstin || '27AMSPK9622Q1ZZ'}</span>
               </div>
             </div>
           </div>
