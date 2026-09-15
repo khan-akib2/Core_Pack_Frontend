@@ -207,6 +207,7 @@ async function buildPrintHtml(element) {
       width: 794px !important;
       min-width: 794px !important;
       max-width: 794px !important;
+      min-height: 1123px !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
@@ -214,6 +215,7 @@ async function buildPrintHtml(element) {
       width: 794px !important;
       min-width: 794px !important;
       max-width: 794px !important;
+      min-height: 1123px !important;
       margin: 0 !important;
       padding: 0 !important;
       box-shadow: none !important;
@@ -221,6 +223,7 @@ async function buildPrintHtml(element) {
       background: #ffffff !important;
       visibility: visible !important;
       display: block !important;
+      box-sizing: border-box !important;
     }
     .no-print, .print\\:hidden { display: none !important; }
   `;
