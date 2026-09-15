@@ -521,14 +521,20 @@ export function InvoicePrintable({ invoice, company }) {
       </div>{/* end main box */}
 
       {/* bottom-right orange triangle */}
-      <div style={{
-        position: 'absolute', bottom: 0, right: 0,
-        width: 0, height: 0, borderStyle: 'solid',
-        borderWidth: '0 0 58px 58px',
-        borderColor: 'transparent transparent #F26522 transparent',
-        pointerEvents: 'none',
-        zIndex: 20,
-      }} />
+      <svg
+        width="58"
+        height="58"
+        viewBox="0 0 58 58"
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          pointerEvents: 'none',
+          zIndex: 20,
+        }}
+      >
+        <polygon points="58,0 58,58 0,58" fill={O} />
+      </svg>
 
     </div>
   );
