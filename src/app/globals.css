@@ -72,34 +72,28 @@ main {
   html, body {
     background: #ffffff !important;
     color: #000000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    height: auto !important;
-    overflow: visible !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   body * {
-    visibility: hidden !important;
+    visibility: hidden;
   }
   .printable-document, .printable-document * {
-    visibility: visible !important;
+    visibility: visible;
   }
   .printable-document {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 794px !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;
     color: #000000 !important;
-    transform: none !important;
-    z-index: 999999 !important;
   }
-  .no-print, .print\:hidden {
+  .no-print {
     display: none !important;
   }
   @page {

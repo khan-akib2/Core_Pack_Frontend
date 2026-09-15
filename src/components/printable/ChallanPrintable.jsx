@@ -79,15 +79,10 @@ export function ChallanPrintable({ challan, company }) {
             print-color-adjust: exact; 
           }
           .printable-document {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 794px !important;
             margin: 0 auto !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
             page-break-inside: avoid !important;
-            z-index: 999999 !important;
           }
         }
       `}</style>
@@ -105,18 +100,20 @@ export function ChallanPrintable({ challan, company }) {
         </div>
 
         {/* Content Layer */}
-        <div style={{ display: 'flex', position: 'relative', zIndex: 2, height: '105px', minHeight: '105px', maxHeight: '105px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', position: 'relative', zIndex: 2, minHeight: '105px' }}>
           {/* LEFT: Logo */}
-          <div style={{ flex: 1, padding: '8px 15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ flex: 1, padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img
               src="/branding/logo.png"
               alt="Core Pack India"
               style={{
-                maxHeight: '88px',
-                maxWidth: '280px',
-                width: 'auto',
-                height: 'auto',
-                display: 'block',
+                width: '100%',
+                height: '100%',
+                maxHeight: '190px',
+                objectFit: 'contain',
+                objectPosition: '23px',
+                transform: 'scale(1.4)',
+                transformOrigin: 'center center',
                 mixBlendMode: 'multiply'
               }}
             />
@@ -125,45 +122,45 @@ export function ChallanPrintable({ challan, company }) {
           {/* RIGHT: Contact */}
           <div style={{
             width: '380px',
-            padding: '6px 20px 6px 40px',
+            padding: '10px 25px 10px 45px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            gap: '4px'
+            gap: '8px'
           }}>
             {/* Address */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <div style={{ marginTop: '1px' }}><IcPin /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Address</span>
-                <span style={{ color: 'white', fontSize: '9.5px', lineHeight: '1.25' }}>{compAddr}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <div style={{ marginTop: '2px' }}><IcPin /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Address</span>
+                <span style={{ color: 'white', fontSize: '10.5px', lineHeight: '1.4' }}>{compAddr}</span>
               </div>
             </div>
 
             {/* Mobile */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <div style={{ marginTop: '1px' }}><IcPhone /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Mobile</span>
-                <span style={{ color: 'white', fontSize: '9.5px', lineHeight: '1.25' }}>{company?.phone || '8851000041 / 9324540077'}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <div style={{ marginTop: '2px' }}><IcPhone /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mobile</span>
+                <span style={{ color: 'white', fontSize: '10.5px', lineHeight: '1.4' }}>{company?.phone || '8851000041 / 9324540077'}</span>
               </div>
             </div>
 
             {/* Email */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <div style={{ marginTop: '1px' }}><IcMail /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Email</span>
-                <span style={{ color: 'white', fontSize: '9.5px', lineHeight: '1.25' }}>{company?.email || 'corepackindia@gmail.com'}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <div style={{ marginTop: '2px' }}><IcMail /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</span>
+                <span style={{ color: 'white', fontSize: '10.5px', lineHeight: '1.4' }}>{company?.email || 'corepackindia@gmail.com'}</span>
               </div>
             </div>
 
             {/* GSTIN */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <div style={{ marginTop: '1px' }}><IcGlobe /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                <span style={{ fontWeight: '800', color: O, fontSize: '8.5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>GSTIN</span>
-                <span style={{ color: 'white', fontSize: '10px', lineHeight: '1.25', fontFamily: 'monospace', fontWeight: '700', letterSpacing: '0.5px' }}>{company?.gstin || '27AMSPK9622Q1ZZ'}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <div style={{ marginTop: '2px' }}><IcGlobe /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontWeight: '800', color: O, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>GSTIN</span>
+                <span style={{ color: 'white', fontSize: '11px', lineHeight: '1.4', fontFamily: 'monospace', fontWeight: '700', letterSpacing: '0.5px' }}>{company?.gstin || '27AMSPK9622Q1ZZ'}</span>
               </div>
             </div>
           </div>
@@ -186,7 +183,7 @@ export function ChallanPrintable({ challan, company }) {
           <div style={{ flex: '1', padding: '12px 16px', borderRight: B2 }}>
             {/* Name */}
             <div style={{ display: 'flex', alignItems: 'flex-end', minHeight: '26px', marginBottom: '8px' }}>
-              <span style={{ ...LBL({ w: 30 }), color: O, fontSize: '12px' }}>M/s.</span>
+              <span style={{ ...LBL({w: 30}), color: O, fontSize: '12px' }}>M/s.</span>
               <div style={{ ...LINE, borderBottom: '1px solid #111', fontWeight: '800', textTransform: 'uppercase', fontSize: '13px', paddingLeft: '8px', color: '#111' }}>{custName}</div>
             </div>
             {/* Address */}
@@ -259,9 +256,9 @@ export function ChallanPrintable({ challan, company }) {
             ))}
             {/* Filler row to absorb remaining flex height */}
             <tr style={{ height: 'auto' }}>
-              <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
-              <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
-              <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+                <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
             </tr>
           </tbody>
         </table>
@@ -274,17 +271,17 @@ export function ChallanPrintable({ challan, company }) {
               Receiver&apos;s Signature
             </div>
           </div>
-
+          
           {/* Right: Proprietor Signature */}
           <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', padding: '16px 24px' }}>
             <div style={{ fontSize: '12.5px', fontWeight: '800', color: O }}>
               For {company?.companyName || 'CORE PACK INDIA'}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '240px' }}>
-              <img
-                src="/branding/signature.png"
-                alt="Authorized Signature"
-                style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }}
+              <img 
+                src="/branding/signature.png" 
+                alt="Authorized Signature" 
+                style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
               />
               <div style={{ width: '100%', borderTop: '1px solid #111', paddingTop: '4px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: N }}>
                 Proprietor / Authorised Signatory
