@@ -48,58 +48,6 @@ export async function generatePdfFromElement(element, filename = 'document.pdf')
   // Remove utility classes that hide or offset elements
   clone.classList.remove('fixed', '-left-[9999px]', 'opacity-0', '-z-50', 'hidden');
 
-  // 3. Normalize cloned DOM elements specifically for html2canvas rendering compatibility
-  // A. Logo normalization (prevents html2canvas image stretch & transform scale distortion)
-  const logoImg = clone.querySelector('img[src*="logo.png"]');
-  if (logoImg) {
-    logoImg.style.maxHeight = '88px';
-    logoImg.style.maxWidth = '280px';
-    logoImg.style.width = 'auto';
-    logoImg.style.height = 'auto';
-    logoImg.style.transform = 'none';
-    logoImg.style.objectFit = 'contain';
-    logoImg.style.objectPosition = 'center';
-    logoImg.style.display = 'block';
-    logoImg.style.margin = '0 auto';
-  }
-
-  // B. Contact Panel & Header height normalization (prevents header height expansion beyond 105px)
-  const allDivs = clone.querySelectorAll('div');
-  allDivs.forEach(div => {
-    if (div.style && div.style.width === '380px') {
-      div.style.padding = '6px 20px 6px 40px';
-      div.style.gap = '4px';
-      const spans = div.querySelectorAll('span');
-      spans.forEach(span => {
-        if (span.style.fontSize === '9px') span.style.fontSize = '8.5px';
-        if (span.style.fontSize === '10.5px') span.style.fontSize = '9.5px';
-        if (span.style.fontSize === '11px') span.style.fontSize = '10px';
-        if (span.style.lineHeight) span.style.lineHeight = '1.25';
-      });
-    }
-    if (div.style && (div.style.minHeight === '105px' || div.style.minHeight === '105px')) {
-      div.style.height = '105px';
-      div.style.maxHeight = '105px';
-      div.style.overflow = 'hidden';
-    }
-    // C. Bottom-right border triangle replacement on clone (prevents 852px width miscalculation in html2canvas)
-    if (div.style && div.style.borderWidth && div.style.borderWidth.includes('58px')) {
-      const svgTri = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svgTri.setAttribute('width', '58');
-      svgTri.setAttribute('height', '58');
-      svgTri.setAttribute('viewBox', '0 0 58 58');
-      svgTri.style.position = 'absolute';
-      svgTri.style.bottom = '0';
-      svgTri.style.right = '0';
-      svgTri.style.pointerEvents = 'none';
-      svgTri.style.zIndex = '20';
-      svgTri.innerHTML = '<polygon points="58,0 58,58 0,58" fill="#F26522" />';
-      if (div.parentNode) {
-        div.parentNode.replaceChild(svgTri, div);
-      }
-    }
-  });
-
   container.appendChild(clone);
   document.body.appendChild(container);
 
@@ -134,6 +82,8 @@ export async function generatePdfFromElement(element, filename = 'document.pdf')
 
 /**
  * Robust print/download handler for Android & Web.
+ * Uses Puppeteer server rendering for pixel-perfect document geometry preservation,
+ * with client-side html2pdf fallback when offline.
  */
 export async function printOrDownloadDocument({ type, documentId, title, elementQuery = '.printable-document', fallbackEndpoint }) {
   if (Capacitor.isNativePlatform()) {
@@ -141,29 +91,35 @@ export async function printOrDownloadDocument({ type, documentId, title, element
     const safeTitle = (title || `${type}_${documentId}`).replace(/\s+/g, '_');
     const fileName = `${safeTitle}.pdf`;
 
-    // Try client-side DOM render first for instant offline generation
-    const element = document.querySelector(elementQuery);
-    if (element) {
+    // 1. Try server-side Puppeteer rendering first (pixel-perfect vector A4 layout matching exact React component)
+    const endpointMap = {
+      invoice: `/invoices/${documentId}/download/invoice?format=base64`,
+      quotation: `/quotations/${documentId}/download/quotation?format=base64`,
+      challan: `/challans/${documentId}/download/challan?format=base64`
+    };
+    const url = fallbackEndpoint || endpointMap[type];
+
+    if (url) {
       try {
-        pureBase64 = await generatePdfFromElement(element, fileName);
-      } catch (err) {
-        console.warn('[pdfUtils] Client PDF generation error, falling back to server:', err);
+        const res = await api.get(url);
+        if (res.data && res.data.base64) {
+          pureBase64 = res.data.base64;
+        }
+      } catch (serverErr) {
+        console.warn('[pdfUtils] Server PDF generation failed, attempting client-side DOM render:', serverErr);
       }
     }
 
-    // Fallback to backend API endpoint if element is missing or client render failed
+    // 2. Client-side DOM fallback if server is unreachable or document type has no backend endpoint
     if (!pureBase64) {
-      const endpointMap = {
-        invoice: `/invoices/${documentId}/download/invoice?format=base64`,
-        quotation: `/quotations/${documentId}/download/quotation?format=base64`,
-        challan: `/challans/${documentId}/download/challan?format=base64`
-      };
-      const url = fallbackEndpoint || endpointMap[type];
-      const res = await api.get(url);
-      if (!res.data || !res.data.base64) {
-        throw new Error('Failed to retrieve PDF data from server');
+      const element = document.querySelector(elementQuery);
+      if (element) {
+        pureBase64 = await generatePdfFromElement(element, fileName);
       }
-      pureBase64 = res.data.base64;
+    }
+
+    if (!pureBase64) {
+      throw new Error('Failed to generate PDF document');
     }
 
     // Save PDF to Android cache directory
