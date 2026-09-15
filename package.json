@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "cap:sync": "npx cap sync",
-    "cap:build": "npx cap build android"
+    "cap:build": "npx cap build android",
+    "postinstall": "node scripts/patch-printer.js"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^8.0.0",

@@ -195,19 +195,26 @@ async function buildPrintHtml(element) {
   }
 
   const defaultPrintCss = `
-    @page { margin: 0; size: A4 portrait; }
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
     html, body {
       background: #ffffff !important;
       color: #000000 !important;
       margin: 0 !important;
       padding: 0 !important;
-      width: 100% !important;
+      width: 794px !important;
+      min-width: 794px !important;
+      max-width: 794px !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
     .printable-document {
       width: 794px !important;
-      margin: 0 auto !important;
+      min-width: 794px !important;
+      max-width: 794px !important;
+      margin: 0 !important;
       padding: 0 !important;
       box-shadow: none !important;
       border: none !important;
@@ -222,8 +229,9 @@ async function buildPrintHtml(element) {
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=794, initial-scale=1.0">
   <style>
+    @page { size: A4 portrait; margin: 0; }
     ${styles}
     ${defaultPrintCss}
   </style>
