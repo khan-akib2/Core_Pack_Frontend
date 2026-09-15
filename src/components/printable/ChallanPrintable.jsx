@@ -188,7 +188,7 @@ export function ChallanPrintable({ challan, company }) {
           <div style={{ flex: '1', padding: '12px 16px', borderRight: B2 }}>
             {/* Name */}
             <div style={{ display: 'flex', alignItems: 'flex-end', minHeight: '26px', marginBottom: '8px' }}>
-              <span style={{ ...LBL({w: 30}), color: O, fontSize: '12px' }}>M/s.</span>
+              <span style={{ ...LBL({ w: 30 }), color: O, fontSize: '12px' }}>M/s.</span>
               <div style={{ ...LINE, borderBottom: '1px solid #111', fontWeight: '800', textTransform: 'uppercase', fontSize: '13px', paddingLeft: '8px', color: '#111' }}>{custName}</div>
             </div>
             {/* Address */}
@@ -261,9 +261,9 @@ export function ChallanPrintable({ challan, company }) {
             ))}
             {/* Filler row to absorb remaining flex height */}
             <tr style={{ height: 'auto' }}>
-                <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
-                <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
-                <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderRight: B2, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 25px, #1B2A6B 25px, #1B2A6B 26px)', backgroundSize: '100% 26px', backgroundPosition: 'top' }}>&nbsp;</td>
             </tr>
           </tbody>
         </table>
@@ -276,17 +276,17 @@ export function ChallanPrintable({ challan, company }) {
               Receiver&apos;s Signature
             </div>
           </div>
-          
+
           {/* Right: Proprietor Signature */}
           <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', padding: '16px 24px' }}>
             <div style={{ fontSize: '12.5px', fontWeight: '800', color: O }}>
               For {company?.companyName || 'CORE PACK INDIA'}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '240px' }}>
-              <img 
-                src="/branding/signature.png" 
-                alt="Authorized Signature" 
-                style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
+              <img
+                src="/branding/signature.png"
+                alt="Authorized Signature"
+                style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }}
               />
               <div style={{ width: '100%', borderTop: '1px solid #111', paddingTop: '4px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: N }}>
                 Proprietor / Authorised Signatory

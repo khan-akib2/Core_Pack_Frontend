@@ -239,10 +239,10 @@ export function InvoicePrintable({ invoice, company }) {
 
         {/* ── TOP ROW: Invoice Title & Copies Box ── */}
         <div style={{ display: 'flex', borderBottom: B2, alignItems: 'stretch' }}>
-          
+
           {/* Left Spacer (matches copies box width to perfectly center the title) */}
           <div style={{ flex: '0 0 240px' }} />
-          
+
           {/* Center: INVOICE Title */}
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <h2 style={{
@@ -510,10 +510,10 @@ export function InvoicePrintable({ invoice, company }) {
                   For CORE PACK INDIA
                 </div>
                 <div style={{ position: 'absolute', bottom: '4px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <img 
-                    src="/branding/signature.png" 
-                    alt="Authorized Signature" 
-                    style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
+                  <img
+                    src="/branding/signature.png"
+                    alt="Authorized Signature"
+                    style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }}
                   />
                   <div style={{ width: '240px', borderTop: '1px solid #888', marginBottom: '4px' }} />
                   <div style={{ fontSize: '9.5px', fontWeight: '700', color: '#111' }}>Authorised Signatory</div>

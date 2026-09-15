@@ -339,11 +339,11 @@ export function QuotationPrintable({ quotation, company }) {
             ))}
             {/* Filler row to absorb remaining flex height */}
             <tr style={{ height: 'auto' }}>
-                <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
-                <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
-                <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
-                <td style={{ borderRight: '1px solid #8896C4', borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
-                <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderRight: B1, borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderRight: '1px solid #8896C4', borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
+              <td style={{ borderBottom: 'none', backgroundImage: 'linear-gradient(to bottom, transparent 0px, transparent 23px, #8896C4 23px, #8896C4 24px)', backgroundSize: '100% 24px', backgroundPosition: 'top' }}>&nbsp;</td>
             </tr>
           </tbody>
         </table>
@@ -368,17 +368,17 @@ export function QuotationPrintable({ quotation, company }) {
                 For {company?.companyName || 'CORE PACK INDIA'}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '230px' }}>
-                <img 
-                  src="/branding/signature.png" 
-                  alt="Authorized Signature" 
-                  style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }} 
+                <img
+                  src="/branding/signature.png"
+                  alt="Authorized Signature"
+                  style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: '-6px', display: 'block' }}
                 />
                 <div style={{ width: '100%', borderTop: '1px solid #111', paddingTop: '4px', textAlign: 'center', fontSize: '10.5px', fontWeight: '700', color: N }}>
                   Authorised Signatory
                 </div>
               </div>
             </div>
-            
+
           </div>
         </div>
 
