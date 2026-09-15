@@ -1,7 +1,69 @@
 import { Capacitor } from '@capacitor/core';
+import { Printer } from '@capgo/capacitor-printer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { api } from '@/lib/api';
+
+/**
+ * Builds a clean, self-contained HTML document string from a target printable DOM element
+ * for native Android PrintManager invocation.
+ */
+function buildPrintHtml(element) {
+  if (!element) return '';
+
+  let styles = '';
+  try {
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        const rules = Array.from(sheet.cssRules || sheet.rules || []);
+        styles += rules.map(r => r.cssText).join('\n');
+      } catch (e) {
+        // Ignore cross-origin stylesheet read restrictions
+      }
+    }
+  } catch (e) {
+    console.warn('[pdfUtils] Error reading stylesheets for native print:', e);
+  }
+
+  const defaultPrintCss = `
+    @page { margin: 0; size: A4 portrait; }
+    html, body {
+      background: #ffffff !important;
+      color: #000000 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .printable-document {
+      width: 794px !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: #ffffff !important;
+      visibility: visible !important;
+      display: block !important;
+    }
+    .no-print, .print\\:hidden { display: none !important; }
+  `;
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    ${styles}
+    ${defaultPrintCss}
+  </style>
+</head>
+<body>
+  ${element.outerHTML}
+</body>
+</html>`;
+}
 
 /**
  * Generates base64 PDF directly from a DOM element using html2pdf.js
@@ -81,17 +143,32 @@ export async function generatePdfFromElement(element, filename = 'document.pdf')
 }
 
 /**
- * Robust print/download handler for Android & Web.
- * Uses Puppeteer server rendering for pixel-perfect document geometry preservation,
- * with client-side html2pdf fallback when offline.
+ * Native Android & Web print handler.
+ * - On Android Native: Triggers Android PrintManager via @capgo/capacitor-printer
+ * - On Web Browser: Invokes standard window.print()
  */
 export async function printOrDownloadDocument({ type, documentId, title, elementQuery = '.printable-document', fallbackEndpoint }) {
   if (Capacitor.isNativePlatform()) {
-    let pureBase64 = null;
     const safeTitle = (title || `${type}_${documentId}`).replace(/\s+/g, '_');
-    const fileName = `${safeTitle}.pdf`;
 
-    // 1. Try server-side Puppeteer rendering first (pixel-perfect vector A4 layout matching exact React component)
+    // 1. Try native Android PrintManager via @capgo/capacitor-printer
+    const element = document.querySelector(elementQuery);
+    if (element) {
+      try {
+        const printHtml = buildPrintHtml(element);
+        await Printer.print({
+          name: safeTitle,
+          html: printHtml
+        });
+        return true;
+      } catch (printErr) {
+        console.warn('[pdfUtils] Native HTML printer error, trying file print fallback:', printErr);
+      }
+    }
+
+    // 2. Server PDF / File fallback if native HTML print fails
+    let pureBase64 = null;
+    const fileName = `${safeTitle}.pdf`;
     const endpointMap = {
       invoice: `/invoices/${documentId}/download/invoice?format=base64`,
       quotation: `/quotations/${documentId}/download/quotation?format=base64`,
@@ -106,50 +183,44 @@ export async function printOrDownloadDocument({ type, documentId, title, element
           pureBase64 = res.data.base64;
         }
       } catch (serverErr) {
-        console.warn('[pdfUtils] Server PDF generation failed, attempting client-side DOM render:', serverErr);
+        console.warn('[pdfUtils] Server PDF generation fallback failed:', serverErr);
       }
     }
 
-    // 2. Client-side DOM fallback if server is unreachable or document type has no backend endpoint
-    if (!pureBase64) {
-      const element = document.querySelector(elementQuery);
-      if (element) {
-        pureBase64 = await generatePdfFromElement(element, fileName);
-      }
+    if (!pureBase64 && element) {
+      pureBase64 = await generatePdfFromElement(element, fileName);
     }
 
-    if (!pureBase64) {
-      throw new Error('Failed to generate PDF document');
-    }
-
-    // Save PDF to Android cache directory
-    const savedFile = await Filesystem.writeFile({
-      path: fileName,
-      data: pureBase64,
-      directory: Directory.Cache
-    });
-
-    // Trigger Android FileProvider share/print intent
-    try {
-      await Share.share({
-        title: title || 'Document',
-        files: [savedFile.uri],
-        dialogTitle: 'Print or Share Document'
+    if (pureBase64) {
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: pureBase64,
+        directory: Directory.Cache
       });
-      return true;
-    } catch (shareErr) {
-      const msg = String(shareErr?.message || shareErr || '').toLowerCase();
-      if (
-        msg.includes('cancel') ||
-        msg.includes('dismiss') ||
-        msg.includes('user canceled') ||
-        msg.includes('aborted')
-      ) {
-        console.log('[pdfUtils] Share dialog dismissed by user');
-        return false;
+
+      try {
+        await Share.share({
+          title: title || 'Document',
+          files: [savedFile.uri],
+          dialogTitle: 'Print or Share Document'
+        });
+        return true;
+      } catch (shareErr) {
+        const msg = String(shareErr?.message || shareErr || '').toLowerCase();
+        if (
+          msg.includes('cancel') ||
+          msg.includes('dismiss') ||
+          msg.includes('user canceled') ||
+          msg.includes('aborted')
+        ) {
+          console.log('[pdfUtils] Share dialog dismissed by user');
+          return false;
+        }
+        throw shareErr;
       }
-      throw shareErr;
     }
+
+    throw new Error('Failed to open native print dialog');
   }
 
   // Web Browser fallback
