@@ -10,7 +10,7 @@ export function ReportPrintable({ salesReport, gstr1Report, company, selectedDat
     : new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="printable-document hidden print:block bg-white text-slate-900 p-8 max-w-5xl mx-auto text-xs font-sans">
+    <div className="printable-document fixed -left-[9999px] top-0 print:static print:block bg-white text-slate-900 p-8 w-[794px] text-xs font-sans">
       {/* Printable Header */}
       <div className="border-b-2 border-slate-900 pb-4 mb-6 flex items-center justify-between">
         <div>

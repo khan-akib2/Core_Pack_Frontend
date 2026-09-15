@@ -162,16 +162,19 @@ export function DocumentPreviewModal({ isOpen, onClose, type, documentId }) {
             @media (min-width: 768px) { .preview-zoom { transform: scale(0.85); margin-bottom: -168px; } }
             @media (min-width: 1024px) { .preview-zoom { transform: scale(0.95); margin-bottom: -56px; } }
             @media print {
-              body * { visibility: hidden; }
-              .preview-zoom, .preview-zoom * { visibility: visible; }
+              body * { visibility: hidden !important; }
+              .printable-document, .printable-document *, .preview-zoom, .preview-zoom * { visibility: visible !important; }
               .preview-zoom {
-                position: absolute;
-                left: 0;
-                top: 0;
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 794px !important;
                 transform: none !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
+                z-index: 999999 !important;
               }
               .print\\:hidden { display: none !important; }
             }

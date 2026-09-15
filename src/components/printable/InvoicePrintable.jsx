@@ -101,15 +101,16 @@ export function InvoicePrintable({ invoice, company }) {
   const TR = ({ label, value, bold, dark }) => (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '2px 10px',
+      padding: '2px 8px',
       borderBottom: '1px solid #D0D5E0',
       background: dark ? '#EEF1F8' : 'white',
       minHeight: '18px',
+      boxSizing: 'border-box'
     }}>
       <span style={{ fontWeight: bold ? '700' : '500', color: N, fontSize: '10.5px', letterSpacing: '-0.1px' }}>{label}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
         <span style={{ color: N, fontWeight: '700', fontSize: '11px', fontFamily: 'Arial' }}>&#8377;</span>
-        <div style={{ borderBottom: UL, width: '108px', textAlign: 'right', paddingBottom: '1px', fontFamily: 'monospace', fontSize: '10.5px', fontWeight: bold ? '600' : '400', minHeight: '16px' }}>{fmt2(value)}</div>
+        <div style={{ borderBottom: UL, width: '96px', textAlign: 'right', paddingBottom: '1px', paddingRight: '4px', fontFamily: 'monospace', fontSize: '10.5px', fontWeight: bold ? '600' : '400', minHeight: '16px', boxSizing: 'border-box' }}>{fmt2(value)}</div>
       </div>
     </div>
   );
@@ -140,10 +141,15 @@ export function InvoicePrintable({ invoice, company }) {
             print-color-adjust: exact; 
           }
           .printable-document {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 794px !important;
             margin: 0 auto !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
             page-break-inside: avoid !important;
+            z-index: 999999 !important;
           }
         }
       `}</style>
@@ -385,21 +391,21 @@ export function InvoicePrintable({ invoice, company }) {
               const rF = fmtRsPs(item.rate);
               const aF = fmtRsPs(item.taxableAmount || (item.qty * item.rate));
               return (
-                <tr key={idx} style={{ borderBottom: B1, textAlign: 'center', verticalAlign: 'top', height: '25px' }}>
-                  <td style={{ padding: '4px 3px', borderRight: B1, fontSize: '10px' }}>{idx + 1}</td>
-                  <td style={{ padding: '4px 7px', borderRight: B1, textAlign: 'left', fontWeight: '600', fontSize: '10.5px' }}>
+                <tr key={idx} style={{ borderBottom: B1, textAlign: 'center', verticalAlign: 'middle', height: '26px' }}>
+                  <td style={{ padding: '4px 3px', borderRight: B1, fontSize: '10px', verticalAlign: 'middle' }}>{idx + 1}</td>
+                  <td style={{ padding: '4px 7px', borderRight: B1, textAlign: 'left', fontWeight: '600', fontSize: '10.5px', verticalAlign: 'middle' }}>
                     <div>
                       {item.name}
                       {item.boxSize && <span style={{ marginLeft: '6px', fontWeight: '500', color: '#555', fontSize: '9.5px' }}>{item.boxSize}</span>}
                     </div>
                     {item.description && <div style={{ fontSize: '9px', color: '#666', fontWeight: '400' }}>{item.description}</div>}
                   </td>
-                  <td style={{ padding: '4px 3px', borderRight: B1, fontFamily: 'monospace', fontSize: '10px' }}>{item.hsnCode || '44151000'}</td>
-                  <td style={{ padding: '4px 3px', borderRight: B1, fontWeight: '700', fontSize: '10.5px' }}>{item.qty}</td>
-                  <td style={{ padding: '4px 3px', borderRight: '1px solid #8896C4', fontFamily: 'monospace', textAlign: 'right', fontSize: '10px' }}>{rF.rs}</td>
-                  <td style={{ padding: '4px 3px', borderRight: B1, fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px' }}>{rF.ps}</td>
-                  <td style={{ padding: '4px 3px', borderRight: '1px solid #8896C4', fontFamily: 'monospace', fontWeight: '600', textAlign: 'right', fontSize: '10px' }}>{aF.rs}</td>
-                  <td style={{ padding: '4px 3px', fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px' }}>{aF.ps}</td>
+                  <td style={{ padding: '4px 3px', borderRight: B1, fontFamily: 'monospace', fontSize: '10px', verticalAlign: 'middle' }}>{item.hsnCode || '44151000'}</td>
+                  <td style={{ padding: '4px 3px', borderRight: B1, fontWeight: '700', fontSize: '10.5px', verticalAlign: 'middle' }}>{item.qty}</td>
+                  <td style={{ padding: '4px 3px', borderRight: '1px solid #8896C4', fontFamily: 'monospace', textAlign: 'right', fontSize: '10px', verticalAlign: 'middle' }}>{rF.rs}</td>
+                  <td style={{ padding: '4px 3px', borderRight: B1, fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px', verticalAlign: 'middle' }}>{rF.ps}</td>
+                  <td style={{ padding: '4px 3px', borderRight: '1px solid #8896C4', fontFamily: 'monospace', fontWeight: '600', textAlign: 'right', fontSize: '10px', verticalAlign: 'middle' }}>{aF.rs}</td>
+                  <td style={{ padding: '4px 3px', fontFamily: 'monospace', textAlign: 'left', color: '#555', fontSize: '10px', verticalAlign: 'middle' }}>{aF.ps}</td>
                 </tr>
               );
             })}

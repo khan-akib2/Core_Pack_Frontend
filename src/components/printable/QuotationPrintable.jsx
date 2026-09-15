@@ -129,10 +129,15 @@ export function QuotationPrintable({ quotation, company }) {
             print-color-adjust: exact; 
           }
           .printable-document {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 794px !important;
             margin: 0 auto !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
             page-break-inside: avoid !important;
+            z-index: 999999 !important;
           }
         }
       `}</style>
