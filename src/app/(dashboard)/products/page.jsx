@@ -200,65 +200,121 @@ export default function ProductsPage() {
         </div>
       </Card>
 
-      <Card className="p-0 overflow-hidden border-slate-200/80">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse whitespace-nowrap">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="p-3.5 pl-4">Product Description</th>
-                <th className="p-3.5">Category</th>
-                <th className="p-3.5">HSN Code</th>
-                <th className="p-3.5">GST %</th>
-                <th className="p-3.5">Unit</th>
-                <th className="p-3.5 pr-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-normal">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Loading catalog...</td>
+      {/* Desktop Table View */}
+      <div className="hidden sm:block">
+        <Card className="p-0 overflow-hidden border-slate-200/80">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  <th className="p-3.5 pl-4">Product Description</th>
+                  <th className="p-3.5">Category</th>
+                  <th className="p-3.5">HSN Code</th>
+                  <th className="p-3.5">GST %</th>
+                  <th className="p-3.5">Unit</th>
+                  <th className="p-3.5 pr-4 text-right">Actions</th>
                 </tr>
-              ) : products.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No products in catalog.</td>
-                </tr>
-              ) : (
-                products.map((p) => (
-                  <tr key={p._id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="p-3.5 pl-4 font-semibold text-slate-900 text-xs">{p.name}</td>
-                    <td className="p-3.5">
-                      <Badge variant="default" className="text-[10.5px] font-medium bg-slate-100/80 text-slate-700 border-slate-200">
-                        {p.category}
-                      </Badge>
-                    </td>
-                    <td className="p-3.5 font-mono text-[11.5px] text-slate-500">{p.hsnCode}</td>
-                    <td className="p-3.5 text-xs font-medium text-slate-600">{p.gstRate}%</td>
-                    <td className="p-3.5 text-xs text-slate-500">{p.unit || 'Pcs'}</td>
-                    <td className="p-3.5 pr-4 text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        <button
-                          onClick={() => handleEdit(p)}
-                          className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
-                          title="Edit Product"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p._id, p.name)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                          title="Delete Product"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-normal">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Loading catalog...</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                ) : products.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No products in catalog.</td>
+                  </tr>
+                ) : (
+                  products.map((p) => (
+                    <tr key={p._id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="p-3.5 pl-4 font-semibold text-slate-900 text-xs">{p.name}</td>
+                      <td className="p-3.5">
+                        <Badge variant="default" className="text-[10.5px] font-medium bg-slate-100/80 text-slate-700 border-slate-200">
+                          {p.category}
+                        </Badge>
+                      </td>
+                      <td className="p-3.5 font-mono text-[11.5px] text-slate-500">{p.hsnCode}</td>
+                      <td className="p-3.5 text-xs font-medium text-slate-600">{p.gstRate}%</td>
+                      <td className="p-3.5 text-xs text-slate-500">{p.unit || 'Pcs'}</td>
+                      <td className="p-3.5 pr-4 text-right">
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <button
+                            onClick={() => handleEdit(p)}
+                            className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
+                            title="Edit Product"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p._id, p.name)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                            title="Delete Product"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="sm:hidden space-y-3">
+        {isLoading ? (
+          <div className="p-6 text-center text-slate-400 text-xs font-medium">Loading catalog...</div>
+        ) : products.length === 0 ? (
+          <div className="p-6 text-center text-slate-400 text-xs font-medium bg-white rounded-xl border border-slate-200/80">No products in catalog.</div>
+        ) : (
+          products.map((p) => (
+            <Card key={p._id} className="p-4 border-slate-200/80 shadow-sm space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">{p.name}</h3>
+                  <Badge variant="default" className="mt-1 text-[10px] font-medium bg-slate-100 text-slate-700 border-slate-200">
+                    {p.category}
+                  </Badge>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => handleEdit(p)}
+                    className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
+                    title="Edit Product"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p._id, p.name)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                    title="Delete Product"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-xs">
+                <div>
+                  <span className="block text-[10px] text-slate-400 uppercase font-bold">HSN Code</span>
+                  <span className="font-mono text-slate-700 font-semibold">{p.hsnCode}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] text-slate-400 uppercase font-bold">GST Rate</span>
+                  <span className="font-semibold text-slate-700">{p.gstRate}%</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] text-slate-400 uppercase font-bold">Unit</span>
+                  <span className="font-semibold text-slate-700">{p.unit || 'Pcs'}</span>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Add / Edit Product Modal */}
       {showModal && (

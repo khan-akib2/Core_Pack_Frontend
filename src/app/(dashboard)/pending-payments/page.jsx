@@ -17,6 +17,9 @@ import {
   Download
 } from 'lucide-react';
 import { debounce } from 'lodash';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { PaymentHistoryModal } from '@/components/payments/PaymentHistoryModal';
 import { CustomerStatementModal } from '@/components/payments/CustomerStatementModal';
@@ -55,8 +58,7 @@ export default function PendingPaymentsPage() {
   const invoices = response?.data?.invoices || [];
   const summary = response?.data?.summary || { totalOutstanding: 0, unpaidCount: 0, partialCount: 0, overdueCount: 0, overdueAmount: 0 };
 
-  const handleExport = () => {
-    // Basic CSV export logic leveraging browser capabilities (keeps it simple and dependency-free for V1)
+  const handleExport = async () => {
     if (!invoices.length) return;
     
     const headers = ['Company', 'Invoice Number', 'Date', 'Total Amount', 'Paid Amount', 'Pending Amount', 'Status'];
@@ -71,11 +73,34 @@ export default function PendingPaymentsPage() {
     ]);
     
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Pending_Payments_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
+    const fileName = `Pending_Payments_${new Date().toISOString().split('T')[0]}.csv`;
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const base64Data = btoa(unescape(encodeURIComponent(csvContent)));
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+        await Share.share({
+          title: fileName,
+          text: 'Pending Payments Report',
+          files: [result.uri],
+          dialogTitle: 'Save or Share Report'
+        });
+      } catch (err) {
+        if (!/cancel|canceled|cancelled|dismissed/i.test(err?.message || String(err))) {
+          console.error('File export error:', err);
+        }
+      }
+    } else {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    }
   };
 
   return (

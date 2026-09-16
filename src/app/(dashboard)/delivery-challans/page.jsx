@@ -59,8 +59,8 @@ export default function DeliveryChallansPage() {
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Delivery Challans</h1>
           <p className="text-xs text-slate-500 mt-0.5">Track factory dispatches, goods movement, and vehicle logs</p>
         </div>
-        <Link href="/delivery-challans/new" className="w-full sm:w-auto">
-          <Button className="flex items-center justify-center gap-2 w-full whitespace-nowrap">
+        <Link href="/delivery-challans/new">
+          <Button className="flex items-center gap-2">
             <Plus className="w-4 h-4" /> Issue Delivery Challan
           </Button>
         </Link>

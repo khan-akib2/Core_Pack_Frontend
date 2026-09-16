@@ -59,8 +59,8 @@ export default function QuotationsPage() {
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Quotations Engine</h1>
           <p className="text-xs text-slate-500 mt-0.5">Generate and manage official client price quotations</p>
         </div>
-        <Link href="/quotations/new" className="w-full sm:w-auto">
-          <Button className="flex items-center justify-center gap-2 w-full whitespace-nowrap">
+        <Link href="/quotations/new">
+          <Button className="flex items-center gap-2">
             <Plus className="w-4 h-4" /> Create Quotation
           </Button>
         </Link>
