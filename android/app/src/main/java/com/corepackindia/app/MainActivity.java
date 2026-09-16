@@ -10,13 +10,13 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         applyStatusBarTheme();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         applyStatusBarTheme();
     }
