@@ -154,7 +154,7 @@ export default function DashboardPage() {
                       <Link href={`/delivery-challans/${c._id}`}>{c.challanNumber}</Link>
                     </td>
                     <td className="py-3 font-semibold text-slate-900">{c.customerSnapshot?.companyName || c.customerSnapshot?.name}</td>
-                    <td className="py-3 font-mono uppercase text-slate-600">{c.vehicleNo || 'MH-04-AB-1234'}</td>
+                    <td className="py-3 font-mono uppercase text-slate-600">{c.vehicleNo || c.transportDetails?.vehicleNo || c.vehicleNumber || 'N/A'}</td>
                     <td className="py-3 text-slate-500">{formatDate(c.challanDate)}</td>
                     <td className="py-3 text-right">
                       <Badge variant={c.status === 'Invoiced' ? 'success' : 'info'}>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                   {c.customerSnapshot?.companyName || c.customerSnapshot?.name}
                 </div>
                 <div className="flex justify-between items-center text-slate-500 text-xs">
-                  <span className="font-mono uppercase">{c.vehicleNo || 'MH-04-AB-1234'}</span>
+                  <span className="font-mono uppercase">{c.vehicleNo || c.transportDetails?.vehicleNo || c.vehicleNumber || 'N/A'}</span>
                   <span>{formatDate(c.challanDate)}</span>
                 </div>
               </div>
