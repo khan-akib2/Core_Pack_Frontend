@@ -25,6 +25,7 @@ npx capacitor-assets generate --android
 
 # Restore original logo.png and cleanup
 mv assets/logo_backup.png assets/logo.png
-rm assets/logo_trimmed.png assets/icon-foreground.png assets/icon-background.png assets/splash.png assets/splash-dark.png
+rm -f android/app/src/main/res/drawable-*/ic_splash_logo.png
+rm -f assets/logo_trimmed.png assets/icon-foreground.png assets/icon-background.png assets/splash.png assets/splash-dark.png
 
 
