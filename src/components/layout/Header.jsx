@@ -36,6 +36,7 @@ export default function Header({ onOpenSearch, onMenuToggle }) {
       const res = await api.get('/notifications');
       return res.data;
     },
+    staleTime: 15 * 1000,
     refetchInterval: 15000
   });
 

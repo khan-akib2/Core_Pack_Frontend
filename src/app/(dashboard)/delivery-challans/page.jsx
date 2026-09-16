@@ -12,6 +12,8 @@ import { Search, Plus, Eye, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { DocumentPreviewModal } from '@/components/ui/DocumentPreviewModal';
 
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function DeliveryChallansPage() {
@@ -25,7 +27,8 @@ export default function DeliveryChallansPage() {
     queryFn: async () => {
       const res = await api.get(`/challans?search=${encodeURIComponent(search)}`);
       return res.data.data;
-    }
+    },
+    staleTime: 2 * 60 * 1000 // 2 minutes operational freshness
   });
 
   const deleteChallanMutation = useMutation({
@@ -34,7 +37,8 @@ export default function DeliveryChallansPage() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['challans'] });
+      queryClient.invalidateQueries({ queryKey: ['recentChallans'] });
     }
   });
 
@@ -61,7 +65,7 @@ export default function DeliveryChallansPage() {
         </div>
         <Link href="/delivery-challans/new">
           <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Issue Delivery Challan
+            <Plus className="w-4 h-4" /> Create New Challan
           </Button>
         </Link>
       </div>
@@ -70,7 +74,7 @@ export default function DeliveryChallansPage() {
         <div className="flex items-center space-x-2">
           <Search className="w-4.5 h-4.5 text-slate-400" />
           <Input
-            placeholder="Search by Challan #, Vehicle No, Customer..."
+            placeholder="Search by Challan #, Customer Name, Vehicle No..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent border-none shadow-none focus:ring-0 text-xs placeholder:text-slate-400 py-1.5 px-1"
@@ -81,61 +85,61 @@ export default function DeliveryChallansPage() {
       <Card className="p-0 overflow-hidden border-slate-200/80">
         {/* Desktop View */}
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-left border-collapse whitespace-nowrap">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="p-3.5 pl-4">Challan #</th>
-                <th className="p-3.5">Customer</th>
-                <th className="p-3.5">Vehicle No</th>
-                <th className="p-3.5">Dispatch Date</th>
-                <th className="p-3.5 pr-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-normal">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">Loading delivery challans...</td>
+          {isLoading ? (
+            <TableSkeleton rows={5} cols={5} />
+          ) : (
+            <table className="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  <th className="p-3.5 pl-4">Challan #</th>
+                  <th className="p-3.5">Customer</th>
+                  <th className="p-3.5">Vehicle No</th>
+                  <th className="p-3.5">Dispatch Date</th>
+                  <th className="p-3.5 pr-4 text-right">Actions</th>
                 </tr>
-              ) : challans.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">No delivery challans found.</td>
-                </tr>
-              ) : (
-                challans.map((dc) => (
-                  <tr key={dc._id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="p-3.5 pl-4 font-mono font-semibold text-orange-600">
-                      <Link href={`/delivery-challans/${dc._id}`}>{dc.challanNumber}</Link>
-                    </td>
-                    <td className="p-3.5 font-semibold text-slate-900">
-                      {dc.customerSnapshot?.companyName || dc.customerSnapshot?.name}
-                    </td>
-                    <td className="p-3.5 font-mono text-xs uppercase text-slate-600">{dc.vehicleNo || 'N/A'}</td>
-                    <td className="p-3.5 text-xs text-slate-500">{formatDate(dc.challanDate)}</td>
-                    <td className="p-3.5 pr-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => setPreviewModal({ isOpen: true, type: 'challan', id: dc._id })}>
-                          <Eye className="w-3.5 h-3.5 mr-1" /> View
-                        </Button>
-                        <button
-                          onClick={() => handleDelete(dc._id, dc.challanNumber)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                          title="Delete Delivery Challan"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-normal">
+                {challans.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">No delivery challans found.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  challans.map((dc) => (
+                    <tr key={dc._id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="p-3.5 pl-4 font-mono font-semibold text-orange-600">
+                        <Link href={`/delivery-challans/${dc._id}`}>{dc.challanNumber}</Link>
+                      </td>
+                      <td className="p-3.5 font-semibold text-slate-900">
+                        {dc.customerSnapshot?.companyName || dc.customerSnapshot?.name}
+                      </td>
+                      <td className="p-3.5 font-mono text-xs uppercase text-slate-600">{dc.vehicleNo || 'N/A'}</td>
+                      <td className="p-3.5 text-xs text-slate-500">{formatDate(dc.challanDate)}</td>
+                      <td className="p-3.5 pr-4 text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Button variant="outline" size="sm" className="text-xs" onClick={() => setPreviewModal({ isOpen: true, type: 'challan', id: dc._id })}>
+                            <Eye className="w-3.5 h-3.5 mr-1" /> View
+                          </Button>
+                          <button
+                            onClick={() => handleDelete(dc._id, dc.challanNumber)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                            title="Delete Delivery Challan"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Mobile View */}
         <div className="sm:hidden flex flex-col gap-3 p-3">
           {isLoading ? (
-            <div className="p-6 text-center text-slate-400 font-medium text-xs">Loading delivery challans...</div>
+            <CardSkeleton count={4} />
           ) : challans.length === 0 ? (
             <div className="p-6 text-center text-slate-400 font-medium text-xs">No delivery challans found.</div>
           ) : (

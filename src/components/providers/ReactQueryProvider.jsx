@@ -7,7 +7,8 @@ export default function ReactQueryProvider({ children }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 5 * 60 * 1000, // 5 minutes default freshness
+        staleTime: 2 * 60 * 1000, // 2 minutes default fallback freshness
+        gcTime: 15 * 60 * 1000, // 15 minutes cache retention
         refetchOnMount: true,
         refetchOnWindowFocus: true,
         refetchInterval: false, // Disabled global polling for performance

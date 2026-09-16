@@ -24,6 +24,8 @@ import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { PaymentHistoryModal } from '@/components/payments/PaymentHistoryModal';
 import { CustomerStatementModal } from '@/components/payments/CustomerStatementModal';
 
+import { KpiCardSkeleton, TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+
 export default function PendingPaymentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -52,7 +54,8 @@ export default function PendingPaymentsPage() {
       
       const res = await api.get(`/payments/pending?${params.toString()}`);
       return res.data;
-    }
+    },
+    staleTime: 1 * 60 * 1000 // 1 minute freshness for financial balance tracking
   });
 
   const invoices = response?.data?.invoices || [];
@@ -120,51 +123,55 @@ export default function PendingPaymentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Outstanding</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.totalOutstanding)}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-orange-600">
-            <TrendingUp className="w-4 h-4" />
-            <span>Across all pending invoices</span>
-          </div>
-        </Card>
-        
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Unpaid Invoices</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{summary.unpaidCount}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-rose-500">
-            <AlertCircle className="w-4 h-4" />
-            <span>0% received</span>
-          </div>
-        </Card>
+      {isLoading ? (
+        <KpiCardSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Outstanding</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.totalOutstanding)}</p>
+            </div>
+            <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-emerald-600">
+              <TrendingUp className="w-4 h-4" />
+              <span>Across all pending invoices</span>
+            </div>
+          </Card>
+          
+          <Card className="p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Unpaid Invoices</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{summary.unpaidCount}</p>
+            </div>
+            <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-rose-500">
+              <AlertCircle className="w-4 h-4" />
+              <span>0% received</span>
+            </div>
+          </Card>
 
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Partially Paid</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{summary.partialCount}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-amber-500">
-            <History className="w-4 h-4" />
-            <span>Payments in progress</span>
-          </div>
-        </Card>
+          <Card className="p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Partially Paid</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{summary.partialCount}</p>
+            </div>
+            <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-amber-500">
+              <History className="w-4 h-4" />
+              <span>Payments in progress</span>
+            </div>
+          </Card>
 
-        <Card className="p-5 flex flex-col justify-between bg-rose-50/30 border-rose-100">
-          <div>
-            <p className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Overdue</p>
-            <p className="text-2xl font-bold text-rose-900 mt-1.5 tracking-tight">{formatCurrency(summary.overdueAmount)}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-rose-600">
-            <AlertCircle className="w-4 h-4" />
-            <span>{summary.overdueCount} invoices past due</span>
-          </div>
-        </Card>
-      </div>
+          <Card className="p-5 flex flex-col justify-between bg-rose-50/30 border-rose-100">
+            <div>
+              <p className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Overdue</p>
+              <p className="text-2xl font-bold text-rose-900 mt-1.5 tracking-tight">{formatCurrency(summary.overdueAmount)}</p>
+            </div>
+            <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-rose-600">
+              <AlertCircle className="w-4 h-4" />
+              <span>{summary.overdueCount} invoices past due</span>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Controls */}
       <Card className="p-4 border-slate-200/80 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white shadow-sm">
@@ -199,25 +206,26 @@ export default function PendingPaymentsPage() {
       <div className="hidden sm:block">
         <Card className="border-slate-200/80 shadow-sm overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr className="text-slate-500 text-[11px] uppercase font-bold tracking-wider">
-                <th className="px-4 py-3">Company</th>
-                <th className="px-4 py-3">Invoice</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Bill Total</th>
-                <th className="px-4 py-3">Paid</th>
-                <th className="px-4 py-3">Outstanding</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {isLoading ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-400">Loading payments...</td></tr>
-              ) : invoices.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500">All payments are up to date. No pending invoices.</td></tr>
-              ) : (
+            {isLoading ? (
+              <TableSkeleton rows={5} cols={8} />
+            ) : (
+              <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr className="text-slate-500 text-[11px] uppercase font-bold tracking-wider">
+                  <th className="px-4 py-3">Company</th>
+                  <th className="px-4 py-3">Invoice</th>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Bill Total</th>
+                  <th className="px-4 py-3">Paid</th>
+                  <th className="px-4 py-3">Outstanding</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {invoices.length === 0 ? (
+                  <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500">All payments are up to date. No pending invoices.</td></tr>
+                ) : (
                 invoices.map((inv) => (
                   <tr key={inv._id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-4 py-3 font-semibold text-slate-900">
@@ -260,14 +268,15 @@ export default function PendingPaymentsPage() {
               )}
             </tbody>
           </table>
-        </div>
-      </Card>
-    </div>
+        )}
+      </div>
+    </Card>
+  </div>
 
       {/* Mobile Cards */}
       <div className="sm:hidden space-y-4">
         {isLoading ? (
-          <div className="py-8 text-center text-slate-400 text-sm">Loading payments...</div>
+          <CardSkeleton count={4} />
         ) : invoices.length === 0 ? (
           <div className="py-12 text-center text-slate-500 text-sm bg-white rounded-xl border border-slate-100 shadow-sm">All payments are up to date.</div>
         ) : (

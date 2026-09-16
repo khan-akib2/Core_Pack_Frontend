@@ -55,7 +55,8 @@ export default function Sidebar({ isMobileOpen, onCloseMobile }) {
     queryFn: async () => {
       const res = await api.get('/company');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const company = companyRes || {};

@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Plus, Search, X, Edit, Trash2 } from 'lucide-react';
 
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function CustomersPage() {
@@ -32,7 +34,8 @@ export default function CustomersPage() {
     queryFn: async () => {
       const res = await api.get(`/customers?search=${encodeURIComponent(search)}`);
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000 // 10 minutes catalog freshness
   });
 
   const customers = Array.isArray(customersData) ? customersData : customersData?.data || [];
@@ -146,58 +149,58 @@ export default function CustomersPage() {
       <div className="hidden sm:block">
         <Card className="p-0 overflow-hidden border-slate-200/80">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse whitespace-nowrap">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  <th className="p-3.5 pl-4">Company Name</th>
-                  <th className="p-3.5">GSTIN</th>
-                  <th className="p-3.5">Phone / Email</th>
-                  <th className="p-3.5">Billing Address</th>
-                  <th className="p-3.5 pr-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs font-normal">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">Loading customers...</td>
+            {isLoading ? (
+              <TableSkeleton rows={5} cols={5} />
+            ) : (
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3.5 pl-4">Company Name</th>
+                    <th className="p-3.5">GSTIN</th>
+                    <th className="p-3.5">Phone / Email</th>
+                    <th className="p-3.5">Billing Address</th>
+                    <th className="p-3.5 pr-4 text-right">Actions</th>
                   </tr>
-                ) : customers.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">No customers registered.</td>
-                  </tr>
-                ) : (
-                  customers.map((c) => (
-                    <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="p-3.5 pl-4 font-semibold text-slate-900">{c.companyName || c.name}</td>
-                      <td className="p-3.5 font-mono font-semibold text-orange-600">{c.gstin || 'Unregistered'}</td>
-                      <td className="p-3.5 text-xs text-slate-700">
-                        <div>{c.phone || 'N/A'}</div>
-                        {c.email && <div className="text-[11px] text-slate-400">{c.email}</div>}
-                      </td>
-                      <td className="p-3.5 text-xs text-slate-700">{c.billingAddress?.street || 'N/A'}</td>
-                      <td className="p-3.5 pr-4 text-right">
-                        <div className="flex items-center justify-end space-x-1.5">
-                          <button
-                            onClick={() => handleEdit(c)}
-                            className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
-                            title="Edit Customer"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(c._id, c.companyName || c.name)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                            title="Delete Customer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-normal">
+                  {customers.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-6 text-center text-slate-400 font-medium">No customers registered.</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    customers.map((c) => (
+                      <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="p-3.5 pl-4 font-semibold text-slate-900">{c.companyName || c.name}</td>
+                        <td className="p-3.5 font-mono font-semibold text-orange-600">{c.gstin || 'Unregistered'}</td>
+                        <td className="p-3.5 text-xs text-slate-700">
+                          <div>{c.phone || 'N/A'}</div>
+                          {c.email && <div className="text-[11px] text-slate-400">{c.email}</div>}
+                        </td>
+                        <td className="p-3.5 text-xs text-slate-700">{c.billingAddress?.street || 'N/A'}</td>
+                        <td className="p-3.5 pr-4 text-right">
+                          <div className="flex items-center justify-end space-x-1.5">
+                            <button
+                              onClick={() => handleEdit(c)}
+                              className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
+                              title="Edit Customer"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(c._id, c.companyName || c.name)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                              title="Delete Customer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </Card>
       </div>
@@ -205,7 +208,7 @@ export default function CustomersPage() {
       {/* Mobile Card View */}
       <div className="sm:hidden space-y-3">
         {isLoading ? (
-          <div className="p-6 text-center text-slate-400 text-xs font-medium">Loading customers...</div>
+          <CardSkeleton count={4} />
         ) : customers.length === 0 ? (
           <div className="p-6 text-center text-slate-400 text-xs font-medium bg-white rounded-xl border border-slate-200/80">No customers registered.</div>
         ) : (

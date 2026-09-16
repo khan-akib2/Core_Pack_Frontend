@@ -11,6 +11,8 @@ import { useCustomModal } from '@/components/providers/ModalProvider';
 import Link from 'next/link';
 
 
+import { FormSkeleton } from '@/components/ui/Skeleton';
+
 export default function SettingsPage() {
   const { showAlert } = useCustomModal();
   const queryClient = useQueryClient();
@@ -42,7 +44,8 @@ export default function SettingsPage() {
     queryFn: async () => {
       const res = await api.get('/company');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000 // 10 minutes settings freshness
   });
 
   useEffect(() => {
@@ -103,7 +106,7 @@ export default function SettingsPage() {
     });
   };
 
-  if (isLoading) return <p className="text-slate-400 p-8 text-center text-xs font-medium">Loading Company Profile Settings...</p>;
+  if (isLoading) return <FormSkeleton />;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto pb-12 antialiased">

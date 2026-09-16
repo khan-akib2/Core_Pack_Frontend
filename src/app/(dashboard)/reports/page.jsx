@@ -16,6 +16,8 @@ import { Share } from '@capacitor/share';
 import { printOrDownloadDocument } from '@/lib/pdfUtils';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
+import { KpiCardSkeleton, TableSkeleton } from '@/components/ui/Skeleton';
+
 // Helper to calculate start/end dates for a given month/year
 const getMonthDates = (year, monthIndex) => {
   const startDate = new Date(year, monthIndex, 1).toISOString();
@@ -77,23 +79,25 @@ export default function ReportsPage() {
   }, [selectedDate]);
 
   // Current Month Queries
-  const { data: salesReport, isFetching: isFetchingSales } = useQuery({
+  const { data: salesReport, isFetching: isFetchingSales, isLoading: isLoadingSales } = useQuery({
     queryKey: ['salesReport', currentParams.sales],
     queryFn: async () => {
       const res = await api.get('/reports/sales', { params: currentParams.sales });
       return res.data.data;
     },
     placeholderData: (prev) => prev,
+    staleTime: 1 * 60 * 1000,
     refetchInterval: false
   });
 
-  const { data: gstr1Report, isFetching: isFetchingGstr } = useQuery({
+  const { data: gstr1Report, isFetching: isFetchingGstr, isLoading: isLoadingGstr } = useQuery({
     queryKey: ['gstr1Report', currentParams.gstr],
     queryFn: async () => {
       const res = await api.get('/reports/gstr-1', { params: currentParams.gstr });
       return res.data.data;
     },
     placeholderData: (prev) => prev,
+    staleTime: 1 * 60 * 1000,
     refetchInterval: false
   });
 
@@ -104,6 +108,7 @@ export default function ReportsPage() {
       const res = await api.get('/reports/sales', { params: prevParams.sales });
       return res.data.data;
     },
+    staleTime: 1 * 60 * 1000,
     refetchInterval: false
   });
 
@@ -113,6 +118,7 @@ export default function ReportsPage() {
       const res = await api.get('/reports/gstr-1', { params: prevParams.gstr });
       return res.data.data;
     },
+    staleTime: 1 * 60 * 1000,
     refetchInterval: false
   });
 
@@ -122,6 +128,7 @@ export default function ReportsPage() {
       const res = await api.get('/company');
       return res.data.data;
     },
+    staleTime: 10 * 60 * 1000,
     refetchInterval: false
   });
 

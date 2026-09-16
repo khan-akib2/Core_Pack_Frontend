@@ -27,9 +27,14 @@ export function RecordPaymentModal({ isOpen, onClose, invoice, onSuccess }) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['pendingPayments']);
-      queryClient.invalidateQueries(['customerSummary']);
-      queryClient.invalidateQueries(['salesReport']);
+      queryClient.invalidateQueries({ queryKey: ['pendingPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recentInvoices'] });
+      if (invoice?._id) {
+        queryClient.invalidateQueries({ queryKey: ['invoice', invoice._id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['customerSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['salesReport'] });
       if (onSuccess) onSuccess();
       onClose();
     },

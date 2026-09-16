@@ -12,6 +12,8 @@ import { Plus, Search, Eye, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { DocumentPreviewModal } from '@/components/ui/DocumentPreviewModal';
 
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function InvoicesPage() {
@@ -25,7 +27,8 @@ export default function InvoicesPage() {
     queryFn: async () => {
       const res = await api.get(`/invoices?search=${encodeURIComponent(search)}`);
       return res.data.data;
-    }
+    },
+    staleTime: 2 * 60 * 1000 // 2 minutes operational freshness
   });
 
   const deleteInvoiceMutation = useMutation({
@@ -34,7 +37,10 @@ export default function InvoicesPage() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recentInvoices'] });
+      queryClient.invalidateQueries({ queryKey: ['salesReport'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingPayments'] });
     }
   });
 
@@ -81,68 +87,68 @@ export default function InvoicesPage() {
       <Card className="p-0 overflow-hidden border-slate-200/80">
         {/* Desktop View */}
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-left border-collapse whitespace-nowrap">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="p-3.5 pl-4">Invoice #</th>
-                <th className="p-3.5">Customer</th>
-                <th className="p-3.5">Date</th>
-                <th className="p-3.5">Amount</th>
-                <th className="p-3.5">Status</th>
-                <th className="p-3.5 pr-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-normal">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Loading invoices...</td>
+          {isLoading ? (
+            <TableSkeleton rows={5} cols={6} />
+          ) : (
+            <table className="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  <th className="p-3.5 pl-4">Invoice #</th>
+                  <th className="p-3.5">Customer</th>
+                  <th className="p-3.5">Date</th>
+                  <th className="p-3.5">Amount</th>
+                  <th className="p-3.5">Status</th>
+                  <th className="p-3.5 pr-4 text-right">Actions</th>
                 </tr>
-              ) : invoices.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No invoices found.</td>
-                </tr>
-              ) : (
-                invoices.map((inv) => (
-                  <tr key={inv._id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="p-3.5 pl-4 font-mono font-semibold text-orange-600">
-                      <Link href={`/invoices/${inv._id}`}>{inv.invoiceNumber}</Link>
-                    </td>
-                    <td className="p-3.5">
-                      <p className="font-semibold text-slate-900 text-xs">{inv.customerSnapshot?.companyName || inv.customerSnapshot?.name}</p>
-                      <p className="text-[11px] text-slate-400">GST: {inv.customerSnapshot?.gstin || 'Unregistered'}</p>
-                    </td>
-                    <td className="p-3.5 text-xs text-slate-500">{formatDate(inv.invoiceDate)}</td>
-                    <td className="p-3.5 font-bold text-slate-900">{formatCurrency(inv.grandTotal)}</td>
-                    <td className="p-3.5">
-                      <Badge variant={inv.paymentStatus === 'Paid' ? 'success' : inv.paymentStatus === 'Partial' ? 'warning' : 'danger'}>
-                        {inv.paymentStatus}
-                      </Badge>
-                    </td>
-                    <td className="p-3.5 pr-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => setPreviewModal({ isOpen: true, type: 'invoice', id: inv._id })}>
-                          <Eye className="w-3.5 h-3.5 mr-1" /> View
-                        </Button>
-                        <button
-                          onClick={() => handleDelete(inv._id, inv.invoiceNumber)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                          title="Delete Invoice"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-normal">
+                {invoices.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No invoices found.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  invoices.map((inv) => (
+                    <tr key={inv._id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="p-3.5 pl-4 font-mono font-semibold text-orange-600">
+                        <Link href={`/invoices/${inv._id}`}>{inv.invoiceNumber}</Link>
+                      </td>
+                      <td className="p-3.5">
+                        <p className="font-semibold text-slate-900 text-xs">{inv.customerSnapshot?.companyName || inv.customerSnapshot?.name}</p>
+                        <p className="text-[11px] text-slate-400">GST: {inv.customerSnapshot?.gstin || 'Unregistered'}</p>
+                      </td>
+                      <td className="p-3.5 text-xs text-slate-500">{formatDate(inv.invoiceDate)}</td>
+                      <td className="p-3.5 font-bold text-slate-900">{formatCurrency(inv.grandTotal)}</td>
+                      <td className="p-3.5">
+                        <Badge variant={inv.paymentStatus === 'Paid' ? 'success' : inv.paymentStatus === 'Partial' ? 'warning' : 'danger'}>
+                          {inv.paymentStatus}
+                        </Badge>
+                      </td>
+                      <td className="p-3.5 pr-4 text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Button variant="outline" size="sm" className="text-xs" onClick={() => setPreviewModal({ isOpen: true, type: 'invoice', id: inv._id })}>
+                            <Eye className="w-3.5 h-3.5 mr-1" /> View
+                          </Button>
+                          <button
+                            onClick={() => handleDelete(inv._id, inv.invoiceNumber)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                            title="Delete Invoice"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Mobile View */}
         <div className="sm:hidden flex flex-col gap-3 p-3">
           {isLoading ? (
-            <div className="p-6 text-center text-slate-400 font-medium text-xs">Loading invoices...</div>
+            <CardSkeleton count={4} />
           ) : invoices.length === 0 ? (
             <div className="p-6 text-center text-slate-400 font-medium text-xs">No invoices found.</div>
           ) : (

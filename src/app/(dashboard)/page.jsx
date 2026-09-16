@@ -9,13 +9,16 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { TrendingUp, AlertCircle, CheckCircle2, ArrowUpRight as ArrowIcon } from 'lucide-react';
 import Link from 'next/link';
 
+import { KpiCardSkeleton, TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
+
 export default function DashboardPage() {
-  const { data: salesData } = useQuery({
+  const { data: salesData, isLoading: salesLoading } = useQuery({
     queryKey: ['salesReport'],
     queryFn: async () => {
       const res = await api.get('/reports/sales');
       return res.data.data;
-    }
+    },
+    staleTime: 1 * 60 * 1000 // 1 minute freshness for dashboard revenue analytics
   });
 
   const { data: recentInvoicesData, isLoading: invoicesLoading } = useQuery({
@@ -23,7 +26,8 @@ export default function DashboardPage() {
     queryFn: async () => {
       const res = await api.get('/invoices?limit=6');
       return res.data;
-    }
+    },
+    staleTime: 2 * 60 * 1000 // 2 minutes freshness
   });
 
   const { data: recentChallansData, isLoading: challansLoading } = useQuery({
@@ -31,7 +35,8 @@ export default function DashboardPage() {
     queryFn: async () => {
       const res = await api.get('/challans?limit=6');
       return res.data;
-    }
+    },
+    staleTime: 2 * 60 * 1000 // 2 minutes freshness
   });
 
   const summary = salesData?.summary || {
@@ -59,60 +64,64 @@ export default function DashboardPage() {
       </div>
 
       {/* Top 4 KPI Metric Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Sales Revenue</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.totalRevenue)}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-emerald-600">
-            <TrendingUp className="w-4 h-4" />
-            <span>↑ 15% from last month</span>
-          </div>
-        </Card>
-
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Dispatches</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">
-              {recentChallansData?.pagination?.totalItems || recentChallans.length || 0} Challans
-            </p>
-          </div>
-          <div className="mt-3 space-y-1.5">
-            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-orange-500 h-1.5 rounded-full w-[100%]"></div>
-            </div>
-            <p className="text-xs font-medium text-slate-500">Live active data</p>
-          </div>
-        </Card>
-
-        <Card className="p-5 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Realized Cashflow</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.paidAmountTotal)}</p>
-          </div>
-          <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-emerald-600">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Updated in real-time</span>
-          </div>
-        </Card>
-
-        <Link href="/pending-payments" className="block outline-none">
-          <Card className="p-5 flex flex-col justify-between h-full hover:border-rose-300 transition-colors cursor-pointer group">
+      {salesLoading ? (
+        <KpiCardSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Card className="p-5 flex flex-col justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-rose-600 transition-colors">Outstanding Receivables</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.outstandingAmountTotal)}</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Sales Revenue</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.totalRevenue)}</p>
             </div>
-            <div className="mt-3 flex items-center justify-between text-xs font-semibold text-rose-500">
-              <div className="flex items-center space-x-1">
-                <AlertCircle className="w-4 h-4" />
-                <span>{summary.totalInvoicesCount || 0} active invoice accounts</span>
-              </div>
-              <ArrowIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-emerald-600">
+              <TrendingUp className="w-4 h-4" />
+              <span>↑ 15% from last month</span>
             </div>
           </Card>
-        </Link>
-      </div>
+
+          <Card className="p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Dispatches</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">
+                {recentChallansData?.pagination?.totalItems || recentChallans.length || 0} Challans
+              </p>
+            </div>
+            <div className="mt-3 space-y-1.5">
+              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-orange-500 h-1.5 rounded-full w-[100%]"></div>
+              </div>
+              <p className="text-xs font-medium text-slate-500">Live active data</p>
+            </div>
+          </Card>
+
+          <Card className="p-5 flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Realized Cashflow</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.paidAmountTotal)}</p>
+            </div>
+            <div className="mt-3 flex items-center space-x-1 text-xs font-semibold text-emerald-600">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Updated in real-time</span>
+            </div>
+          </Card>
+
+          <Link href="/pending-payments" className="block outline-none">
+            <Card className="p-5 flex flex-col justify-between h-full hover:border-rose-300 transition-colors cursor-pointer group">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-rose-600 transition-colors">Outstanding Receivables</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1.5 tracking-tight">{formatCurrency(summary.outstandingAmountTotal)}</p>
+              </div>
+              <div className="mt-3 flex items-center justify-between text-xs font-semibold text-rose-500">
+                <div className="flex items-center space-x-1">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{summary.totalInvoicesCount || 0} active invoice accounts</span>
+                </div>
+                <ArrowIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </Card>
+          </Link>
+        </div>
+      )}
 
       {/* Dispatches & Delivery Challans Table Section */}
       <Card className="p-4 sm:p-6 space-y-4 border-slate-200/80 w-full overflow-hidden">
@@ -128,50 +137,50 @@ export default function DashboardPage() {
 
         {/* Desktop View */}
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead>
-              <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
-                <th className="pb-3">Challan #</th>
-                <th className="pb-3">Consignee Customer</th>
-                <th className="pb-3">Vehicle No</th>
-                <th className="pb-3">Date</th>
-                <th className="pb-3 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-normal">
-              {challansLoading ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-400 font-medium">Loading dispatches...</td>
+          {challansLoading ? (
+            <TableSkeleton rows={4} cols={5} />
+          ) : (
+            <table className="w-full text-left text-xs whitespace-nowrap">
+              <thead>
+                <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
+                  <th className="pb-3">Challan #</th>
+                  <th className="pb-3">Consignee Customer</th>
+                  <th className="pb-3">Vehicle No</th>
+                  <th className="pb-3">Date</th>
+                  <th className="pb-3 text-right">Status</th>
                 </tr>
-              ) : recentChallans.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-400 font-medium">No active dispatches found.</td>
-                </tr>
-              ) : (
-                recentChallans.map((c) => (
-                  <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 font-mono font-semibold text-orange-600">
-                      <Link href={`/delivery-challans/${c._id}`}>{c.challanNumber}</Link>
-                    </td>
-                    <td className="py-3 font-semibold text-slate-900">{c.customerSnapshot?.companyName || c.customerSnapshot?.name}</td>
-                    <td className="py-3 font-mono uppercase text-slate-600">{c.vehicleNo || c.transportDetails?.vehicleNo || c.vehicleNumber || 'N/A'}</td>
-                    <td className="py-3 text-slate-500">{formatDate(c.challanDate)}</td>
-                    <td className="py-3 text-right">
-                      <Badge variant={c.status === 'Invoiced' ? 'success' : 'info'}>
-                        {c.status || 'Dispatched'}
-                      </Badge>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-normal">
+                {recentChallans.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-400 font-medium">No active dispatches found.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  recentChallans.map((c) => (
+                    <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3 font-mono font-semibold text-orange-600">
+                        <Link href={`/delivery-challans/${c._id}`}>{c.challanNumber}</Link>
+                      </td>
+                      <td className="py-3 font-semibold text-slate-900">{c.customerSnapshot?.companyName || c.customerSnapshot?.name}</td>
+                      <td className="py-3 font-mono uppercase text-slate-600">{c.vehicleNo || c.transportDetails?.vehicleNo || c.vehicleNumber || 'N/A'}</td>
+                      <td className="py-3 text-slate-500">{formatDate(c.challanDate)}</td>
+                      <td className="py-3 text-right">
+                        <Badge variant={c.status === 'Invoiced' ? 'success' : 'info'}>
+                          {c.status || 'Dispatched'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Mobile View */}
         <div className="sm:hidden flex flex-col gap-3">
           {challansLoading ? (
-            <div className="py-6 text-center text-slate-400 font-medium text-xs">Loading dispatches...</div>
+            <CardSkeleton count={3} />
           ) : recentChallans.length === 0 ? (
             <div className="py-6 text-center text-slate-400 font-medium text-xs">No active dispatches found.</div>
           ) : (
@@ -212,50 +221,50 @@ export default function DashboardPage() {
 
         {/* Desktop View */}
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead>
-              <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
-                <th className="pb-3">Invoice #</th>
-                <th className="pb-3">Customer Name</th>
-                <th className="pb-3">Date</th>
-                <th className="pb-3">Grand Total</th>
-                <th className="pb-3 text-right">Payment Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-normal">
-              {invoicesLoading ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-400 font-medium">Loading invoices...</td>
+          {invoicesLoading ? (
+            <TableSkeleton rows={4} cols={5} />
+          ) : (
+            <table className="w-full text-left text-xs whitespace-nowrap">
+              <thead>
+                <tr className="text-slate-400 uppercase font-semibold border-b border-slate-100 pb-2">
+                  <th className="pb-3">Invoice #</th>
+                  <th className="pb-3">Customer Name</th>
+                  <th className="pb-3">Date</th>
+                  <th className="pb-3">Grand Total</th>
+                  <th className="pb-3 text-right">Payment Status</th>
                 </tr>
-              ) : recentInvoices.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-400 font-medium">No invoices issued yet.</td>
-                </tr>
-              ) : (
-                recentInvoices.map((inv) => (
-                  <tr key={inv._id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 font-mono font-semibold text-orange-600">
-                      <Link href={`/invoices/${inv._id}`}>{inv.invoiceNumber}</Link>
-                    </td>
-                    <td className="py-3 font-semibold text-slate-900">{inv.customerSnapshot?.companyName || inv.customerSnapshot?.name}</td>
-                    <td className="py-3 text-slate-500">{formatDate(inv.invoiceDate)}</td>
-                    <td className="py-3 font-bold text-slate-900">{formatCurrency(inv.grandTotal)}</td>
-                    <td className="py-3 text-right">
-                      <Badge variant={inv.paymentStatus === 'Paid' ? 'success' : inv.paymentStatus === 'Partial' ? 'warning' : 'danger'}>
-                        {inv.paymentStatus}
-                      </Badge>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-normal">
+                {recentInvoices.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-400 font-medium">No invoices issued yet.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  recentInvoices.map((inv) => (
+                    <tr key={inv._id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3 font-mono font-semibold text-orange-600">
+                        <Link href={`/invoices/${inv._id}`}>{inv.invoiceNumber}</Link>
+                      </td>
+                      <td className="py-3 font-semibold text-slate-900">{inv.customerSnapshot?.companyName || inv.customerSnapshot?.name}</td>
+                      <td className="py-3 text-slate-500">{formatDate(inv.invoiceDate)}</td>
+                      <td className="py-3 font-bold text-slate-900">{formatCurrency(inv.grandTotal)}</td>
+                      <td className="py-3 text-right">
+                        <Badge variant={inv.paymentStatus === 'Paid' ? 'success' : inv.paymentStatus === 'Partial' ? 'warning' : 'danger'}>
+                          {inv.paymentStatus}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Mobile View */}
         <div className="sm:hidden flex flex-col gap-3">
           {invoicesLoading ? (
-            <div className="py-6 text-center text-slate-400 font-medium text-xs">Loading invoices...</div>
+            <CardSkeleton count={3} />
           ) : recentInvoices.length === 0 ? (
             <div className="py-6 text-center text-slate-400 font-medium text-xs">No invoices issued yet.</div>
           ) : (

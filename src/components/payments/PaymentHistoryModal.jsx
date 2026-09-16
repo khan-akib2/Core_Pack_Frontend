@@ -26,10 +26,15 @@ export function PaymentHistoryModal({ isOpen, onClose, invoice }) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['paymentHistory', invoice?._id]);
-      queryClient.invalidateQueries(['pendingPayments']);
-      queryClient.invalidateQueries(['customerSummary']);
-      queryClient.invalidateQueries(['salesReport']);
+      queryClient.invalidateQueries({ queryKey: ['paymentHistory', invoice?._id] });
+      queryClient.invalidateQueries({ queryKey: ['pendingPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recentInvoices'] });
+      if (invoice?._id) {
+        queryClient.invalidateQueries({ queryKey: ['invoice', invoice._id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['customerSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['salesReport'] });
       setPaymentToDelete(null);
     }
   });

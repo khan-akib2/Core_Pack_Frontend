@@ -49,19 +49,21 @@ export default function NewInvoicePage() {
   }, [nextInvoiceNo, counterData]);
 
   const { data: customers } = useQuery({
-    queryKey: ['customersList'],
+    queryKey: ['customers'],
     queryFn: async () => {
       const res = await api.get('/customers');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const { data: products } = useQuery({
-    queryKey: ['productsList'],
+    queryKey: ['products'],
     queryFn: async () => {
       const res = await api.get('/products');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const createInvoiceMutation = useMutation({
@@ -70,7 +72,11 @@ export default function NewInvoicePage() {
       return res.data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recentInvoices'] });
+      queryClient.invalidateQueries({ queryKey: ['salesReport'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['nextCounterInvoice'] });
       router.push(`/invoices/${data.data._id}`);
     },
     onError: (err) => {

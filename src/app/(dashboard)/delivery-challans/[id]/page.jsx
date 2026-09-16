@@ -24,7 +24,8 @@ export default function ChallanDetailPage() {
     queryFn: async () => {
       const res = await api.get(`/challans/${id}`);
       return res.data.data;
-    }
+    },
+    staleTime: 2 * 60 * 1000
   });
 
   const { data: company } = useQuery({
@@ -32,7 +33,8 @@ export default function ChallanDetailPage() {
     queryFn: async () => {
       const res = await api.get('/company');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const handlePrint = async () => {

@@ -45,19 +45,21 @@ export default function NewQuotationPage() {
   }, [nextQuoteNo, counterData]);
 
   const { data: customers } = useQuery({
-    queryKey: ['customersList'],
+    queryKey: ['customers'],
     queryFn: async () => {
       const res = await api.get('/customers');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const { data: products } = useQuery({
-    queryKey: ['productsList'],
+    queryKey: ['products'],
     queryFn: async () => {
       const res = await api.get('/products');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const createQuotationMutation = useMutation({
@@ -66,7 +68,8 @@ export default function NewQuotationPage() {
       return res.data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['nextCounterQuotation'] });
       router.push(`/quotations/${data.data._id}`);
     },
     onError: (err) => {

@@ -46,19 +46,21 @@ export default function NewDeliveryChallanPage() {
   }, [nextChallanNo, counterData]);
 
   const { data: customers } = useQuery({
-    queryKey: ['customersList'],
+    queryKey: ['customers'],
     queryFn: async () => {
       const res = await api.get('/customers');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const { data: products } = useQuery({
-    queryKey: ['productsList'],
+    queryKey: ['products'],
     queryFn: async () => {
       const res = await api.get('/products');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const createChallanMutation = useMutation({
@@ -67,7 +69,9 @@ export default function NewDeliveryChallanPage() {
       return res.data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['challans'] });
+      queryClient.invalidateQueries({ queryKey: ['recentChallans'] });
+      queryClient.invalidateQueries({ queryKey: ['nextCounterChallan'] });
       router.push(`/delivery-challans/${data.data._id}`);
     },
     onError: (err) => {

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Badge } from '@/components/ui/Badge';
 import { Plus, Search, X, Edit, Trash2, FolderPlus, Tags } from 'lucide-react';
+import { TableSkeleton, CardSkeleton } from '@/components/ui/Skeleton';
 import { useCustomModal } from '@/components/providers/ModalProvider';
 
 export default function ProductsPage() {
@@ -32,7 +33,8 @@ export default function ProductsPage() {
     queryFn: async () => {
       const res = await api.get('/company');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const DEFAULT_CATEGORIES = [
@@ -68,7 +70,8 @@ export default function ProductsPage() {
     queryFn: async () => {
       const res = await api.get(`/products?search=${encodeURIComponent(search)}`);
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000 // 10 minutes catalog freshness
   });
 
   const products = Array.isArray(productsData) ? productsData : productsData?.data || [];
@@ -204,61 +207,61 @@ export default function ProductsPage() {
       <div className="hidden sm:block">
         <Card className="p-0 overflow-hidden border-slate-200/80">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse whitespace-nowrap">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  <th className="p-3.5 pl-4">Product Description</th>
-                  <th className="p-3.5">Category</th>
-                  <th className="p-3.5">HSN Code</th>
-                  <th className="p-3.5">GST %</th>
-                  <th className="p-3.5">Unit</th>
-                  <th className="p-3.5 pr-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs font-normal">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">Loading catalog...</td>
+            {isLoading ? (
+              <TableSkeleton rows={5} cols={6} />
+            ) : (
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3.5 pl-4">Product Description</th>
+                    <th className="p-3.5">Category</th>
+                    <th className="p-3.5">HSN Code</th>
+                    <th className="p-3.5">GST %</th>
+                    <th className="p-3.5">Unit</th>
+                    <th className="p-3.5 pr-4 text-right">Actions</th>
                   </tr>
-                ) : products.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No products in catalog.</td>
-                  </tr>
-                ) : (
-                  products.map((p) => (
-                    <tr key={p._id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="p-3.5 pl-4 font-semibold text-slate-900 text-xs">{p.name}</td>
-                      <td className="p-3.5">
-                        <Badge variant="default" className="text-[10.5px] font-medium bg-slate-100/80 text-slate-700 border-slate-200">
-                          {p.category}
-                        </Badge>
-                      </td>
-                      <td className="p-3.5 font-mono text-[11.5px] text-slate-500">{p.hsnCode}</td>
-                      <td className="p-3.5 text-xs font-medium text-slate-600">{p.gstRate}%</td>
-                      <td className="p-3.5 text-xs text-slate-500">{p.unit || 'Pcs'}</td>
-                      <td className="p-3.5 pr-4 text-right">
-                        <div className="flex items-center justify-end space-x-1.5">
-                          <button
-                            onClick={() => handleEdit(p)}
-                            className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
-                            title="Edit Product"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p._id, p.name)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                            title="Delete Product"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-normal">
+                  {products.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-6 text-center text-slate-400 font-medium">No products in catalog.</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    products.map((p) => (
+                      <tr key={p._id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="p-3.5 pl-4 font-semibold text-slate-900 text-xs">{p.name}</td>
+                        <td className="p-3.5">
+                          <Badge variant="default" className="text-[10.5px] font-medium bg-slate-100/80 text-slate-700 border-slate-200">
+                            {p.category}
+                          </Badge>
+                        </td>
+                        <td className="p-3.5 font-mono text-[11.5px] text-slate-500">{p.hsnCode}</td>
+                        <td className="p-3.5 text-xs font-medium text-slate-600">{p.gstRate}%</td>
+                        <td className="p-3.5 text-xs text-slate-500">{p.unit || 'Pcs'}</td>
+                        <td className="p-3.5 pr-4 text-right">
+                          <div className="flex items-center justify-end space-x-1.5">
+                            <button
+                              onClick={() => handleEdit(p)}
+                              className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
+                              title="Edit Product"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p._id, p.name)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                              title="Delete Product"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </Card>
       </div>
@@ -266,7 +269,7 @@ export default function ProductsPage() {
       {/* Mobile Card View */}
       <div className="sm:hidden space-y-3">
         {isLoading ? (
-          <div className="p-6 text-center text-slate-400 text-xs font-medium">Loading catalog...</div>
+          <CardSkeleton count={4} />
         ) : products.length === 0 ? (
           <div className="p-6 text-center text-slate-400 text-xs font-medium bg-white rounded-xl border border-slate-200/80">No products in catalog.</div>
         ) : (

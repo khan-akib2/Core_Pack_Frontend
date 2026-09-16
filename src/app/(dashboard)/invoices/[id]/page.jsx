@@ -33,7 +33,8 @@ export default function InvoiceDetailPage() {
     queryFn: async () => {
       const res = await api.get(`/invoices/${id}`);
       return res.data.data;
-    }
+    },
+    staleTime: 2 * 60 * 1000
   });
 
   const { data: company } = useQuery({
@@ -41,7 +42,8 @@ export default function InvoiceDetailPage() {
     queryFn: async () => {
       const res = await api.get('/company');
       return res.data.data;
-    }
+    },
+    staleTime: 10 * 60 * 1000
   });
 
   const recordPaymentMutation = useMutation({
@@ -50,7 +52,11 @@ export default function InvoiceDetailPage() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['invoice', id] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recentInvoices'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['salesReport'] });
       setPaymentAmount('');
       setRefNo('');
     },

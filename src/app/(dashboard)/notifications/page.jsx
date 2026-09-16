@@ -20,6 +20,7 @@ import {
   Search,
   ArrowRight
 } from 'lucide-react';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 import { useRouter } from 'next/navigation';
 
 export default function NotificationsPage() {
@@ -36,6 +37,7 @@ export default function NotificationsPage() {
       const res = await api.get('/notifications');
       return res.data;
     },
+    staleTime: 15 * 1000,
     refetchInterval: 15000
   });
 
@@ -180,7 +182,9 @@ export default function NotificationsPage() {
       {/* Notifications List Card */}
       <Card className="border-slate-200/80 overflow-hidden divide-y divide-slate-100">
         {isLoading ? (
-          <p className="text-xs text-slate-500 text-center py-12">Loading notifications...</p>
+          <div className="p-4">
+            <CardSkeleton count={4} />
+          </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-16 px-4">
             <Bell className="w-10 h-10 text-slate-300 mx-auto mb-3" />
